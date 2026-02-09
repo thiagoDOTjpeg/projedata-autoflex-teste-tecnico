@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 public class ProductMaterial extends PanacheEntityBase {
 
   @EmbeddedId
+  @JsonIgnore
   public ProductMaterialId id = new ProductMaterialId();
 
   @ManyToOne(fetch = FetchType.LAZY)

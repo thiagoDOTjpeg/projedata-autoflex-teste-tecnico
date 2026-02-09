@@ -1,6 +1,6 @@
-package com.autoflex.inventory.presentation;
+package com.autoflex.inventory.presentation.resource;
 
-import com.autoflex.inventory.domain.Product;
+import com.autoflex.inventory.domain.RawMaterial;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -9,13 +9,12 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/products")
+@Path("/raw-materials")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ProductResource {
-
+public class RawMaterialResource {
   @GET
-  public List<Product> listAll() {
-    return Product.listAll();
+  public List<RawMaterial> listAll(){
+    return RawMaterial.listAll();
   }
 }

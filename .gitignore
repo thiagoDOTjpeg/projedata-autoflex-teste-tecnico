@@ -1,0 +1,26 @@
+# --- General ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.log
+.env
+.env.local
+
+# --- Backend (Quarkus/Maven) ---
+/backend-quarkus/target/
+/backend-quarkus/bin/
+/backend-quarkus/.mvn/wrapper/maven-wrapper.jar
+/backend-quarkus/.factorypath
+/backend-quarkus/.project
+/backend-quarkus/.settings/
+/backend-quarkus/.classpath
+
+# Se estiver usando Gradle no back:
+/backend-quarkus/.gradle/
+/backend-quarkus/build/
+
+# --- Docker & DB ---
+.docker/
+# Se você mapear o volume do Oracle para uma pasta local (cuidado aqui)
+/oracle-data/

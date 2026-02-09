@@ -1,0 +1,20 @@
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:latest 
+    container_name: autoflex-oracle-db
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=autoflex_pwd
+      - APP_USER=inventory_user
+      - APP_USER_PASSWORD=inventory_pwd
+    healthcheck:
+      test: ["CMD-SHELL", "exit | sqlplus -L -S / AS SYSDBA @?/rdbms/admin/sqlsess.sql"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+
+volumes:
+  oracle_data:

@@ -25,4 +25,16 @@ public class ProductMaterial extends PanacheEntityBase {
 
   @Column(name = "required_quantity", columnDefinition = "NUMBER(19,2)")
   public Double requiredQuantity;
+
+  public static ProductMaterial findByProductAndMaterial(Long productId, Long materialId) {
+    return find("from ProductMaterial pm " +
+                    "left join fetch pm.product " +
+                    "left join fetch pm.rawMaterial " +
+                    "where pm.product.id = ?1 and pm.rawMaterial.id = ?2",
+            productId, materialId).firstResult();
+  }
+
+  public static void removeAssociation(Long productId, Long materialId) {
+    delete("product.id = ?1 and rawMaterial.id = ?2", productId, materialId);
+  }
 }

@@ -1,5 +1,6 @@
-package com.autoflex.inventory.application.service;
+package com.autoflex.inventory.presentation.resource;
 
+import com.autoflex.inventory.application.service.ProductService;
 import com.autoflex.inventory.presentation.dto.ProductionSuggestionDTO;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;

@@ -1,9 +1,11 @@
 package com.autoflex.inventory.presentation.dto;
 
+import java.math.BigDecimal;
+
 public record ProductionSuggestionDTO(
         String productName,
         Integer quantityToProduce,
-        Double unitPrice,
-        Double totalValue
+        BigDecimal unitPrice,
+        BigDecimal totalValue
 ) {
 }

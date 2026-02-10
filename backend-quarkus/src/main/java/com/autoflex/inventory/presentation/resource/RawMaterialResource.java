@@ -19,8 +19,9 @@ public class RawMaterialResource {
   RawMaterialService rawMaterialService;
 
   @GET
-  public List<RawMaterial> listAll(){
-    return rawMaterialService.getAllRawMaterials();
+  public Response listAll(){
+    List<RawMaterial> materials = rawMaterialService.getAllRawMaterials();
+    return Response.status(Response.Status.OK).entity(materials).build();
   }
 
   @PUT

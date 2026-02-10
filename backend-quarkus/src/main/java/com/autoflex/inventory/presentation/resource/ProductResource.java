@@ -3,6 +3,7 @@ package com.autoflex.inventory.presentation.resource;
 import com.autoflex.inventory.application.service.ProductService;
 import com.autoflex.inventory.domain.Product;
 import com.autoflex.inventory.presentation.dto.ProductRequestDTO;
+import com.autoflex.inventory.presentation.dto.ProductUpdateDTO;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -20,12 +21,19 @@ public class ProductResource {
   ProductService productService;
 
   @GET
-  public List<Product> listAll() {
-    return productService.getAllProducts();
+  public Response listAll() {
+    List<Product> products = productService.getAllProducts();
+    return Response.status(Response.Status.OK).entity(products).build();
+  }
+
+  @GET
+  @Path("/{id}")
+  public Response getById(Long id) {
+    Product product = productService.getProductById(id);
+    return Response.status(Response.Status.OK).entity(product).build();
   }
 
   @POST
-  @Transactional
   public Response create(ProductRequestDTO dto) {
     Product product = productService.saveProductWithMaterials(dto);
     return Response.status(Response.Status.CREATED).entity(product).build();
@@ -33,15 +41,13 @@ public class ProductResource {
 
   @PUT
   @Path("/{id}")
-  @Transactional
-  public Response update(Long id, ProductRequestDTO dto) {
+  public Response update(Long id, ProductUpdateDTO dto) {
     Product product = productService.updateProductWithMaterials(id, dto);
     return Response.status(Response.Status.OK).entity(product).build();
   }
 
   @DELETE
   @Path("/{id}")
-  @Transactional
   public Response delete(Long id) {
     productService.deleteProductById(id);
     return Response.noContent().build();

@@ -5,10 +5,12 @@ import com.autoflex.inventory.domain.ProductMaterial;
 import com.autoflex.inventory.domain.RawMaterial;
 import com.autoflex.inventory.presentation.dto.MaterialAmountDTO;
 import com.autoflex.inventory.presentation.dto.ProductRequestDTO;
+import com.autoflex.inventory.presentation.dto.ProductionSuggestionDTO;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -85,6 +87,46 @@ public class ProductService {
     }
 
     return product;
+  }
+
+  public List<ProductionSuggestionDTO> getProductionSuggestions() {
+    List<Product> products = Product.listAllWithMaterials();
+
+    Map<Long, Double> availableStock = RawMaterial.<RawMaterial>listAll().stream()
+            .collect(Collectors.toMap(rm -> rm.id, rm -> rm.stockQuantity));
+
+    List<ProductionSuggestionDTO> suggestions = new ArrayList<>();
+
+    for (Product p : products) {
+      long maxUnitsForProduct = Long.MAX_VALUE;
+
+      if (p.materials.isEmpty()) continue;
+
+      for (ProductMaterial formula : p.materials) {
+        double inStock = availableStock.getOrDefault(formula.rawMaterial.id, 0.0);
+        double required = formula.requiredQuantity;
+
+        if (required > 0) {
+          long possibleWithThisMaterial = (long) Math.floor(inStock / required);
+          maxUnitsForProduct = Math.min(maxUnitsForProduct, possibleWithThisMaterial);
+        }
+      }
+
+      if (maxUnitsForProduct > 0) {
+        for (ProductMaterial formula : p.materials) {
+          double totalUsed = formula.requiredQuantity * maxUnitsForProduct;
+          availableStock.merge(formula.rawMaterial.id, -totalUsed, Double::sum);
+        }
+
+        suggestions.add(new ProductionSuggestionDTO(
+                p.name,
+                (int) maxUnitsForProduct,
+                p.price,
+                p.price * maxUnitsForProduct
+        ));
+      }
+    }
+    return suggestions;
   }
 
   public void deleteProductById(Long id) {

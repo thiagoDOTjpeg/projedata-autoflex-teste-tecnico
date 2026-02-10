@@ -18,11 +18,12 @@ public class RawMaterialService {
   public RawMaterial getRawMaterialById(Long id) {
     RawMaterial material = RawMaterial.findById(id);
     if (material == null) {
-      throw new RuntimeException("Raw material not found");
+      throw new NotFoundException("Raw material not found");
     }
     return material;
   }
 
+  @Transactional
   public RawMaterial saveRawMaterial(RawMaterialRequestDTO dto) {
     RawMaterial material = new RawMaterial();
     material.name = dto.name();
@@ -45,6 +46,7 @@ public class RawMaterialService {
     return material;
   }
 
+  @Transactional
   public void deleteRawMaterialById(Long id) {
     RawMaterial material = getRawMaterialById(id);
     if(material == null) {

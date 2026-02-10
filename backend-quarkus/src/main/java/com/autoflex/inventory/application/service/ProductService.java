@@ -128,7 +128,6 @@ public class ProductService {
     }
     return suggestions;
   }
-
   public void deleteProductById(Long id) {
     Product product = Product.findById(id);
     if (product == null) {

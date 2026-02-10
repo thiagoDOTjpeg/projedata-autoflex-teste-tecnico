@@ -19,6 +19,10 @@ public class Product extends PanacheEntityBase {
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   public List<ProductMaterial> materials = new ArrayList<>();
 
+  public static Product findByIdWithMaterials(Long id) {
+    return find("from Product p left join fetch p.materials m left join fetch m.rawMaterial where p.id = ?1", id).firstResult();
+  }
+
   public static List<Product> listAllWithMaterials() {
     return find("select distinct p from Product p " +
             "left join fetch p.materials m " +

@@ -44,7 +44,7 @@ public class ProductService {
 
   @Transactional
   public Product updateProductWithMaterials(Long id, ProductRequestDTO dto) {
-    Product product = Product.findById(id);
+    Product product = Product.findByIdWithMaterials(id);
     if (product == null) {
       throw new NotFoundException("Product not found");
     }

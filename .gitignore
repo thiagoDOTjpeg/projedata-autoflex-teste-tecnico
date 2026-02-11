@@ -1,4 +1,3 @@
-# --- General ---
 .DS_Store
 .idea/
 .vscode/
@@ -6,8 +5,9 @@
 *.log
 .env
 .env.local
+.env.production
+.env.development
 
-# --- Backend (Quarkus/Maven) ---
 /backend-quarkus/target/
 /backend-quarkus/bin/
 /backend-quarkus/.mvn/wrapper/maven-wrapper.jar
@@ -16,11 +16,16 @@
 /backend-quarkus/.settings/
 /backend-quarkus/.classpath
 
-# Se estiver usando Gradle no back:
-/backend-quarkus/.gradle/
-/backend-quarkus/build/
+/frontend-react/node_modules/
+/frontend-react/dist/
+/frontend-react/build/
+/frontend-react/.next/
+/frontend-react/out/
+/frontend-react/npm-debug.log*
+/frontend-react/yarn-debug.log*
+/frontend-react/yarn-error.log*
+/frontend-react/.pnp*
+/frontend-react/.pnp.js
 
-# --- Docker & DB ---
 .docker/
-# Se você mapear o volume do Oracle para uma pasta local (cuidado aqui)
 /oracle-data/

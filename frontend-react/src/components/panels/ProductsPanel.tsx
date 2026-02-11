@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -29,16 +30,6 @@ export function ProductsPanel() {
     }).format(value);
   };
 
-  if (loading) {
-    return (
-      <div className="p-8 text-center text-slate-500">Loading products...</div>
-    );
-  }
-
-  if (error) {
-    return <div className="p-8 text-center text-red-500">Error: {error}</div>;
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -56,22 +47,50 @@ export function ProductsPanel() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => (
-              <TableRow key={product.id}>
-                <TableCell className="font-medium">{product.name}</TableCell>
-                <TableCell>{formatCurrency(product.price)}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button className="hover:text-red-600">
-                      <Trash2 className="h-4 w-4 transition-colors duration-200" />
-                    </Button>
-                  </div>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[200px]" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4 w-[100px]" />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-end gap-2">
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                      <Skeleton className="h-8 w-8 rounded-md" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={3}
+                  className="h-24 text-center text-red-500"
+                >
+                  Error: Ocurred an error while getting the products!
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              products.map((product) => (
+                <TableRow key={product.id}>
+                  <TableCell className="font-medium">{product.name}</TableCell>
+                  <TableCell>{formatCurrency(product.price)}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button className="hover:text-red-600">
+                        <Trash2 className="h-4 w-4 transition-colors duration-200" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

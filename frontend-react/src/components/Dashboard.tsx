@@ -5,13 +5,11 @@ import { ProductsPanel } from "./panels/ProductsPanel";
 import { RawMaterialsPanel } from "./panels/RawMaterialsPanel";
 
 export function Dashboard() {
-  // Simulate hostname
   const hostname =
     typeof window !== "undefined" ? window.location.hostname : "localhost";
 
   return (
-    <div className="min-w-[1920px] min-h-[1080px] bg-slate-50 flex flex-col">
-      {/* Header / Top Bar (Optional but good for structure) */}
+    <div className="min-w-480 min-h-270 bg-slate-50 flex flex-col">
       <header className="bg-white border-b px-6 py-4">
         <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
           <Factory className="h-6 w-6 text-emerald-600" />
@@ -19,28 +17,27 @@ export function Dashboard() {
         </h1>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 p-8 pb-12 w-full max-w-[1800px] mx-auto">
+      <main className="flex-1 p-8 pb-12 w-full max-w-450 mx-auto">
         <Tabs defaultValue="products" className="w-full space-y-6">
           <div className="flex items-center justify-between">
             <TabsList className="flex flex-row gap-4">
               <TabsTrigger
                 value="production"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-slate-700 hover:bg-slate-100"
+                className="data-[state=active]:text-white text-slate-400 hover:text-slate-400"
               >
                 <Factory className="mr-2 h-4 w-4" />
                 Production
               </TabsTrigger>
               <TabsTrigger
                 value="products"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-slate-700 hover:bg-slate-100"
+                className="data-[state=active]:text-white text-slate-400 hover:text-slate-400"
               >
                 <Package className="mr-2 h-4 w-4" />
                 Products
               </TabsTrigger>
               <TabsTrigger
                 value="materials"
-                className="data-[state=active]:bg-emerald-600 data-[state=active]:text-white text-slate-700 hover:bg-slate-100"
+                className="data-[state=active]:text-white text-slate-400 hover:text-slate-400"
               >
                 <Boxes className="mr-2 h-4 w-4" />
                 Raw Materials
@@ -62,7 +59,6 @@ export function Dashboard() {
         </Tabs>
       </main>
 
-      {/* Fixed Footer Status Bar */}
       <footer className="fixed bottom-0 left-0 right-0 bg-slate-800 text-slate-200 text-xs py-1 px-4 flex items-center justify-between z-50">
         <div>
           <span className="opacity-70">Status: </span>

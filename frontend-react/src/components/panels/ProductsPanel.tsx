@@ -7,29 +7,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { fetchProducts } from "@/store/features/productsSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Edit, Trash2 } from "lucide-react";
-
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-}
-
-const PRODUCTS: Product[] = [
-  { id: "1", name: "Industrial Robot Arm", price: 15000 },
-  { id: "2", name: "Automated AGV", price: 25000 },
-  { id: "3", name: "CNC Machining Center", price: 45000 },
-  { id: "4", name: "Hydraulic Press", price: 12000 },
-  { id: "5", name: "Conveyor Belt System", price: 8500 },
-];
+import { useEffect } from "react";
 
 export function ProductsPanel() {
+  const dispatch = useAppDispatch();
+  const { products, loading, error } = useAppSelector(
+    (state) => state.products,
+  );
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(value);
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 text-center text-slate-500">Loading products...</div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -48,7 +56,7 @@ export function ProductsPanel() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {PRODUCTS.map((product) => (
+            {products.map((product) => (
               <TableRow key={product.id}>
                 <TableCell className="font-medium">{product.name}</TableCell>
                 <TableCell>{formatCurrency(product.price)}</TableCell>

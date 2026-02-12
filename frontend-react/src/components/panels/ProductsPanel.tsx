@@ -9,19 +9,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { fetchProducts } from "@/store/features/productsSlice";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { store } from "@/store/store";
+import type { Product } from "@/types/product";
 import { Edit, Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { Suspense, use } from "react";
+import ErrorBoundary from "../ErrorBoundary";
 
-export function ProductsPanel() {
-  const dispatch = useAppDispatch();
-  const { products, loading, error } = useAppSelector(
-    (state) => state.products,
-  );
+let productsPromise: Promise<Product[]> | null = null;
 
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+function getProductsPromise() {
+  if (!productsPromise) {
+    productsPromise = store.dispatch(fetchProducts()).unwrap();
+  }
+  return productsPromise;
+}
+
+function ProductsTableContent() {
+  const products = use(getProductsPromise());
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -30,6 +34,52 @@ export function ProductsPanel() {
     }).format(value);
   };
 
+  return (
+    <>
+      {products.map((product) => (
+        <TableRow key={product.id}>
+          <TableCell className="font-medium">{product.name}</TableCell>
+          <TableCell>{formatCurrency(product.price)}</TableCell>
+          <TableCell className="text-right">
+            <div className="flex justify-end gap-2">
+              <Button>
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button className="hover:text-red-600">
+                <Trash2 className="h-4 w-4 transition-colors duration-200" />
+              </Button>
+            </div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
+function ProductsTableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <Skeleton className="h-4 w-50" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-50" />
+          </TableCell>
+          <TableCell>
+            <div className="flex justify-end gap-2">
+              <Skeleton className="h-8 w-8 rounded-md" />
+              <Skeleton className="h-8 w-8 rounded-md" />
+            </div>
+          </TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
+export function ProductsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -47,50 +97,22 @@ export function ProductsPanel() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              Array.from({ length: 5 }).map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[200px]" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[100px]" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-2">
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                    </div>
+            <ErrorBoundary
+              fallback={
+                <TableRow>
+                  <TableCell
+                    colSpan={3}
+                    className="h-24 text-center text-red-500"
+                  >
+                    Error: Occurred an error while getting the products!
                   </TableCell>
                 </TableRow>
-              ))
-            ) : error ? (
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  className="h-24 text-center text-red-500"
-                >
-                  Error: Ocurred an error while getting the products!
-                </TableCell>
-              </TableRow>
-            ) : (
-              products.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{formatCurrency(product.price)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button className="hover:text-red-600">
-                        <Trash2 className="h-4 w-4 transition-colors duration-200" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
+              }
+            >
+              <Suspense fallback={<ProductsTableSkeleton />}>
+                <ProductsTableContent />
+              </Suspense>
+            </ErrorBoundary>
           </TableBody>
         </Table>
       </div>

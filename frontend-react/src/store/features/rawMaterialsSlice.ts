@@ -23,6 +23,30 @@ export const fetchRawMaterials = createAsyncThunk(
   }
 )
 
+export const updateRawMaterial = createAsyncThunk(
+  "rawMaterials/updateRawMaterial",
+  async (material: RawMaterial) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL || "http://localhost:8081"}/raw-materials/${material.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: material.name,
+          stockQuantity: material.stockQuantity,
+        }),
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to update raw material");
+
+    const data = await response.json();
+    return data as RawMaterial;
+  }
+);
+
 export const rawMtaerialsSlice = createSlice({
   name: "rawMaterials",
   initialState,
@@ -41,5 +65,20 @@ export const rawMtaerialsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || "Failed to fetch raw materials";
       })
+      .addCase(updateRawMaterial.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateRawMaterial.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.rawMaterials.findIndex(m => m.id === action.payload.id);
+        if (index !== -1) {
+          state.rawMaterials[index] = action.payload;
+        }
+      })
+      .addCase(updateRawMaterial.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to update raw material";
+      });
   }
 })

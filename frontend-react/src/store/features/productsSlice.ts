@@ -16,7 +16,7 @@ const initialState: ProductsState = {
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
   async () => {
-    const response = await fetch('http://localhost:8081/products');
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/products`);
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }

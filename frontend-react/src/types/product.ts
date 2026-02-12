@@ -3,3 +3,9 @@ export interface Product {
   name: string;
   price: number;
 }
+
+export interface RawMaterial {
+  id: string;
+  name: string;
+  stockQuantity: number;
+}

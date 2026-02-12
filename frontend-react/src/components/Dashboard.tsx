@@ -9,21 +9,21 @@ export function Dashboard() {
     typeof window !== "undefined" ? window.location.hostname : "localhost";
 
   return (
-    <div className="min-w-480 min-h-270 bg-slate-50 flex flex-col">
+    <div className="min-w-480 min-h-dvh bg-slate-50 flex flex-col">
       <header className="bg-white border-b px-6 py-4">
         <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-          <Factory className="h-6 w-6 text-emerald-600" />
+          <Factory className="h-6 w-6" />
           Inventory System
         </h1>
       </header>
 
-      <main className="flex-1 p-8 pb-12 w-full max-w-450 mx-auto">
+      <main className="flex-1 p-8 w-full max-w-450 mx-auto">
         <Tabs defaultValue="products" className="w-full space-y-6">
           <div className="flex items-center justify-between">
-            <TabsList className="flex flex-row gap-4">
+            <TabsList className="flex flex-row gap-4 border">
               <TabsTrigger
                 value="production"
-                className="data-[state=active]:text-white text-slate-400 hover:text-slate-400"
+                className="data-[state=active]:text-white bg-white text-slate-400 hover:text-slate-400"
               >
                 <Factory className="mr-2 h-4 w-4" />
                 Production

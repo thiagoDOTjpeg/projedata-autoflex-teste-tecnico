@@ -76,9 +76,7 @@ export function RawMaterialsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-          New Raw Material
-        </Button>
+        <Button className="text-white">New Raw Material</Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm">
         <Table>

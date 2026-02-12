@@ -11,9 +11,10 @@ import {
 import { fetchProducts } from "@/store/features/productsSlice";
 import { store } from "@/store/store";
 import type { Product } from "@/types/product";
-import { Edit, Trash2 } from "lucide-react";
-import { Suspense, use } from "react";
+import { Edit, Package, Trash2 } from "lucide-react";
+import { Suspense, use, useState } from "react";
 import ErrorBoundary from "../ErrorBoundary";
+import { ProductRequirementsDialog } from "../products/ProductRequirementsDialog";
 
 let productsPromise: Promise<Product[]> | null = null;
 
@@ -26,6 +27,8 @@ function getProductsPromise() {
 
 function ProductsTableContent() {
   const products = use(getProductsPromise());
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -42,16 +45,31 @@ function ProductsTableContent() {
           <TableCell>{formatCurrency(product.price)}</TableCell>
           <TableCell className="text-right">
             <div className="flex justify-end gap-2">
-              <Button>
+              <Button
+                size="icon"
+                onClick={() => {
+                  setSelectedProduct(product);
+                  setIsDialogOpen(true);
+                }}
+                title="View Requirements"
+              >
+                <Package className="h-4 w-4" />
+              </Button>
+              <Button size="icon">
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button className="hover:text-red-600">
+              <Button size="icon" className="hover:text-red-600">
                 <Trash2 className="h-4 w-4 transition-colors duration-200" />
               </Button>
             </div>
           </TableCell>
         </TableRow>
       ))}
+      <ProductRequirementsDialog
+        product={selectedProduct}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+      />
     </>
   );
 }
@@ -83,9 +101,7 @@ export function ProductsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
-          New Product
-        </Button>
+        <Button className="text-white">New Product</Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm">
         <Table>
@@ -93,7 +109,7 @@ export function ProductsPanel() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Price</TableHead>
-              <TableHead className="w-25 text-center">Actions</TableHead>
+              <TableHead className="w-32 text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -43,6 +43,19 @@ export const updateProductMaterials = createAsyncThunk(
   }
 );
 
+export const deleteProductMaterials = createAsyncThunk(
+  'products/deleteProductMaterials',
+  async ({ productId, materialId }: { productId: string, materialId: string }) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/product-materials/${productId}/${materialId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete product material');
+    }
+    return { productId, materialId };
+  }
+)
+
 export const productsSlice = createSlice({
   name: 'products',
   initialState,
@@ -70,10 +83,31 @@ export const productsSlice = createSlice({
           state.products[index].materials = materials;
         }
       })
+      .addCase(updateProductMaterials.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(updateProductMaterials.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to update materials';
-      });
+      })
+      .addCase(deleteProductMaterials.fulfilled, (state, action) => {
+        state.loading = false;
+        const { productId, materialId } = action.payload;
+
+        const index = state.products.findIndex(p => p.id === productId);
+        if (index !== -1) {
+          state.products[index].materials = state.products[index].materials.filter(m => m.rawMaterial.id !== materialId);
+        }
+      })
+      .addCase(deleteProductMaterials.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProductMaterials.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete material';
+      })
   },
 });
 

@@ -13,7 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { Edit, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProductRequirementsDialog } from "../products/ProductRequirementsDialog";
+import { ProductMaterialsDialog } from "../products/ProductRequirementsDialog";
 
 export function ProductsPanel() {
   const dispatch = useAppDispatch();
@@ -89,7 +89,7 @@ export function ProductsPanel() {
         </Table>
       </div>
 
-      <ProductRequirementsDialog
+      <ProductMaterialsDialog
         product={selectedProduct}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}

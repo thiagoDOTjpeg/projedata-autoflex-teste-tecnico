@@ -8,12 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { fetchProducts } from "@/store/features/productsSlice";
+import { deleteProduct, fetchProducts } from "@/store/features/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { Edit, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ProductMaterialsDialog } from "../products/ProductRequirementsDialog";
+import { ProductEditDialog } from "../products/ProductEditDialog";
+import { ProductMaterialsDialog } from "../products/ProductMaterialsDialog";
 
 export function ProductsPanel() {
   const dispatch = useAppDispatch();
@@ -21,10 +22,15 @@ export function ProductsPanel() {
   
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
+
+   const handleDelete = async (productId: string) => {
+        await dispatch(deleteProduct(productId))
+    };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -75,10 +81,16 @@ export function ProductsPanel() {
                     >
                       <Package className="h-4 w-4" />
                     </Button>
-                    <Button  size="icon">
+                    <Button
+                      size="icon"
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setIsEditDetailsOpen(true);
+                      }}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button  size="icon" className="hover:text-red-600">
+                    <Button  size="icon" className="hover:text-red-600" onClick={() => handleDelete(product.id)}  >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -93,6 +105,11 @@ export function ProductsPanel() {
         product={selectedProduct}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
+      />
+      <ProductEditDialog
+        product={selectedProduct}
+        open={isEditDetailsOpen}
+        onOpenChange={setIsEditDetailsOpen}
       />
     </div>
   );

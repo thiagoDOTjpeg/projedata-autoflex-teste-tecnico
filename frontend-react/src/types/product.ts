@@ -22,3 +22,9 @@ export interface ProductMaterialUpdate {
     quantity: number
   }[];
 }
+
+export interface ProductUpdate {
+  name?: string;
+  price?: number;
+}
+

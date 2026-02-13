@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
-interface ProductRequirementsDialogProps {
+interface ProductMaterialsDialogProps {
   product: Product | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,7 +32,7 @@ export function ProductMaterialsDialog({
   product,
   open,
   onOpenChange,
-}: ProductRequirementsDialogProps) {
+}: ProductMaterialsDialogProps) {
   const dispatch = useAppDispatch();
   const [isEditing, setIsEditing] = useState(false);
   const [editedMaterials, setEditedMaterials] = useState<ProductMaterial[]>([]);

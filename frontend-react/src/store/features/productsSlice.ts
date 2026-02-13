@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import type { Product, ProductMaterial, ProductMaterialUpdate } from '../../types/product';
+import type { Product, ProductMaterial, ProductMaterialUpdate, ProductUpdate } from '../../types/product';
 
 interface ProductsState {
   products: Product[];
@@ -43,6 +43,25 @@ export const updateProductMaterials = createAsyncThunk(
   }
 );
 
+
+export const updateProduct = createAsyncThunk(
+  'products/updateProduct',
+  async ({ productId, payload }: { productId: string, payload: ProductUpdate }) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/products/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update product');
+    }
+    const data = await response.json();
+    return { productId, product: data as Product };
+  }
+)
+
 export const deleteProductMaterials = createAsyncThunk(
   'products/deleteProductMaterials',
   async ({ productId, materialId }: { productId: string, materialId: string }) => {
@@ -53,6 +72,19 @@ export const deleteProductMaterials = createAsyncThunk(
       throw new Error('Failed to delete product material');
     }
     return { productId, materialId };
+  }
+)
+
+export const deleteProduct = createAsyncThunk(
+  'products/deleteProduct',
+  async (productId: string) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/products/${productId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete product');
+    }
+    return productId;
   }
 )
 
@@ -107,6 +139,37 @@ export const productsSlice = createSlice({
       .addCase(deleteProductMaterials.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to delete material';
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        const { productId, product } = action.payload;
+
+        const index = state.products.findIndex(p => p.id === productId);
+        if (index !== -1) {
+          state.products[index] = product;
+        }
+      })
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to update product';
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        const productId = action.payload;
+
+        state.products = state.products.filter(p => p.id !== productId);
+      })
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to delete product';
       })
   },
 });

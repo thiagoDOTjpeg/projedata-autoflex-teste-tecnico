@@ -12,7 +12,13 @@ export interface RawMaterial {
 }
 
 export interface ProductMaterial {
-  id: number;
   rawMaterial: RawMaterial;
   requiredQuantity: number;
+}
+
+export interface ProductMaterialUpdate {
+  materials: {
+    materialId: string,
+    quantity: number
+  }[];
 }

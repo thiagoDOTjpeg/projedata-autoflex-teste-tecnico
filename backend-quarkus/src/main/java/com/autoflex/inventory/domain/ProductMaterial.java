@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product_materials")
 public class ProductMaterial extends PanacheEntityBase {
@@ -26,12 +28,8 @@ public class ProductMaterial extends PanacheEntityBase {
   @Column(name = "required_quantity", columnDefinition = "NUMBER(19,2)")
   public Double requiredQuantity;
 
-  public static ProductMaterial findByProductAndMaterial(Long productId, Long materialId) {
-    return find("from ProductMaterial pm " +
-                    "left join fetch pm.product " +
-                    "left join fetch pm.rawMaterial " +
-                    "where pm.product.id = ?1 and pm.rawMaterial.id = ?2",
-            productId, materialId).firstResult();
+  public static List<ProductMaterial> findAllByProductId(Long productId) {
+    return find("from ProductMaterial pm left join fetch pm.rawMaterial where pm.product.id = ?1", productId).list();
   }
 
   public static void removeAssociation(Long productId, Long materialId) {

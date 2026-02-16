@@ -1,6 +1,8 @@
 package com.autoflex.inventory.presentation.dto;
 
+import java.util.List;
+
 public record ProductMaterialUpdateDTO(
-        Double quantity
+        List<MaterialAmountDTO> materials
 ) {
 }

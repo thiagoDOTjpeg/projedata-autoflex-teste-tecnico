@@ -4,11 +4,12 @@ import type { RawMaterial } from "@/types/product";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -36,7 +37,7 @@ export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterial
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Edit Raw Material</DialogTitle>
         </DialogHeader>
@@ -64,8 +65,12 @@ export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterial
             </div>
           </div>
         )}
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        <DialogFooter className="flex flex-row gap-2 border-t pt-4">
+          <DialogClose asChild>
+            <Button onClick={onClose}>Cancel</Button>
+          </DialogClose>
+          
+          <div className="flex-1" />
           <Button onClick={handleSaveEdit}>Save changes</Button>
         </DialogFooter>
       </DialogContent>

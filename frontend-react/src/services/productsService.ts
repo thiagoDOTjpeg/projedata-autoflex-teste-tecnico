@@ -1,4 +1,4 @@
-import type { Product, ProductMaterial, ProductMaterialUpdate, ProductRequest, ProductUpdate } from '../types/product';
+import type { Product, ProductMaterial, ProductMaterialUpdate, ProductRequest, ProductUpdate, ProductionSuggestion } from '../types/product';
 import { apiClient } from './apiClient';
 
 export const productsService = {
@@ -18,5 +18,8 @@ export const productsService = {
     apiClient.put<ProductMaterial[]>(`/product-materials/${productId}`, payload),
 
   deleteProductMaterial: (productId: string, materialId: string) =>
-    apiClient.delete<void>(`/product-materials/${productId}/${materialId}`)
+    apiClient.delete<void>(`/product-materials/${productId}/${materialId}`),
+
+  getProductionSuggestions: () =>
+    apiClient.get<ProductionSuggestion[]>('/production/suggestions')
 };

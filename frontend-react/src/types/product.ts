@@ -42,3 +42,10 @@ export interface ProductRequest {
   }[];
 }
 
+export interface ProductionSuggestion {
+  productId: string;
+  productName: string;
+  quantityToProduce: number;
+  totalValue: number;
+}
+

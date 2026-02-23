@@ -1,12 +1,26 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { checkSystemHealth, fetchWhoami } from "@/store/features/systemSlice";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Boxes, Factory, Package } from "lucide-react";
+import { useEffect } from "react";
 import { ProductionPanel } from "./panels/ProductionPanel";
 import { ProductsPanel } from "./panels/ProductsPanel";
 import { RawMaterialsPanel } from "./panels/RawMaterialsPanel";
 
 export function Dashboard() {
-  const hostname =
-    typeof window !== "undefined" ? window.location.hostname : "localhost";
+  const dispatch = useAppDispatch();
+  const { hostname, isHealthy } = useAppSelector((state) => state.system);
+
+  useEffect(() => {
+    dispatch(fetchWhoami());
+    dispatch(checkSystemHealth());
+
+    const intervalId = setInterval(() => {
+      dispatch(checkSystemHealth());
+    }, 30000); 
+
+    return () => clearInterval(intervalId);
+  }, [dispatch]);
 
   return (
     <div className="min-w-480 min-h-dvh bg-slate-50 flex flex-col">
@@ -62,7 +76,11 @@ export function Dashboard() {
       <footer className="fixed bottom-0 left-0 right-0 bg-slate-800 text-slate-200 text-xs py-1 px-4 flex items-center justify-between z-50">
         <div>
           <span className="opacity-70">Status: </span>
-          <span className="font-medium text-emerald-400">Online</span>
+          {isHealthy ? (
+            <span className="font-medium text-emerald-400">Online</span>
+          ) : (
+            <span className="font-medium text-red-500 hover:underline cursor-help" title="Could not reach /health endpoint">Offline</span>
+          )}
         </div>
         <div>
           <span className="opacity-70">Node: </span>

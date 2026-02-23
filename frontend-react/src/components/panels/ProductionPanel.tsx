@@ -33,8 +33,8 @@ export function ProductionPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border bg-white shadow-sm">
-        <Table>
+      <div className="rounded-md border bg-white shadow-sm overflow-x-auto scrollbar-hide">
+        <Table className="min-w-[500px]">
           <TableHeader>
             <TableRow>
               <TableHead>Product</TableHead>

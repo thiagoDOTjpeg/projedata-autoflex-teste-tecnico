@@ -60,8 +60,8 @@ export function ProductsPanel() {
           New Product
         </Button>
       </div>
-      <div className="rounded-md border bg-white shadow-sm">
-        <Table>
+      <div className="rounded-md border bg-white shadow-sm overflow-x-auto scrollbar-hide">
+        <Table className="min-w-[600px]">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>

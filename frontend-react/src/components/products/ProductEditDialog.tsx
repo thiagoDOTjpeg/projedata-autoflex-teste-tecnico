@@ -59,24 +59,24 @@ export function ProductEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
+      <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+            <Label htmlFor="name" className="text-left sm:text-right">
               Name
             </Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="col-span-3"
+              className="col-span-1 sm:col-span-3" 
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
+          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
+            <Label htmlFor="price" className="text-left sm:text-right">
               Price
             </Label>
             <Input
@@ -85,15 +85,16 @@ export function ProductEditDialog({
               step="0.01"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              className="col-span-3"
+              className="col-span-1 sm:col-span-3"
             />
           </div>
         </div>
-        <DialogFooter className="flex flex-row gap-40 border-t pt-4">
+        <DialogFooter className="flex sm:flex-row flex-col gap-2 sm:gap-4 border-t pt-4 mt-4">
           <DialogClose asChild>
-            <Button>Cancel</Button>
+            <Button className="w-full sm:w-auto">Cancel</Button>
           </DialogClose>
-          <Button onClick={handleSave}>Save changes</Button>
+          <div className="flex-1 hidden sm:block" />
+          <Button onClick={handleSave} className="w-full sm:w-auto">Save changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

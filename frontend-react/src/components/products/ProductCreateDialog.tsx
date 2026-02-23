@@ -108,14 +108,14 @@ export function ProductCreateDialog({
       onOpenChange(val);
       if (!val) resetForm();
     }}>
-      <DialogContent className="max-h-[85vh] min-w-[650px] flex flex-col" showCloseButton={false}>
+      <DialogContent className="max-h-[85vh] w-[95vw] max-w-[650px] flex flex-col" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-800">
             Create New Product
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -142,8 +142,8 @@ export function ProductCreateDialog({
 
           <div className="space-y-4">
             <h3 className="font-semibold text-slate-800">Raw Materials</h3>
-            <div className="flex items-end gap-4 p-4 rounded-md border bg-slate-50">
-              <div className="flex-1 space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
+              <div className="flex-1 space-y-2 w-full">
                 <Label htmlFor="material">Select Material</Label>
                 <select
                   id="material"
@@ -163,7 +163,7 @@ export function ProductCreateDialog({
                   ))}
                 </select>
               </div>
-              <div className="w-32 space-y-2">
+              <div className="w-full sm:w-32 space-y-2">
                 <Label htmlFor="quantity">Quantity</Label>
                 <Input
                   id="quantity"
@@ -178,7 +178,7 @@ export function ProductCreateDialog({
               <Button 
                 onClick={handleAddMaterial}
                 disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
-                className="bg-slate-800 hover:bg-slate-900 text-white"
+                className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
                 type="button"
               >
                 <Plus className="h-4 w-4 mr-2" /> Add

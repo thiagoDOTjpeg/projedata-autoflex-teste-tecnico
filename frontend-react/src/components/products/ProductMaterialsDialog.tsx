@@ -138,19 +138,19 @@ export function ProductMaterialsDialog({
         if (!value) setIsEditing(false); 
       }} 
     >
-      <DialogContent className="max-h-[85vh] min-w-[650px] flex flex-col" showCloseButton={false}>
+      <DialogContent className="max-h-[85vh] w-[95vw] max-w-[650px] flex flex-col" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-800">
             Manufacturing Materials: {product.name}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-4 space-y-6">
+        <div className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6">
           {isEditing && (
             <div className="space-y-4">
               <h3 className="font-semibold text-slate-800">Add Raw Material</h3>
-              <div className="flex items-end gap-4 p-4 rounded-md border bg-slate-50">
-                <div className="flex-1 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
+                <div className="flex-1 space-y-2 w-full">
                   <Label htmlFor="material">Select Material</Label>
                   <select
                     id="material"
@@ -170,7 +170,7 @@ export function ProductMaterialsDialog({
                     ))}
                   </select>
                 </div>
-                <div className="w-32 space-y-2">
+                <div className="w-full sm:w-32 space-y-2">
                   <Label htmlFor="quantity">Quantity</Label>
                   <Input
                     id="quantity"
@@ -185,7 +185,7 @@ export function ProductMaterialsDialog({
                 <Button 
                   onClick={handleAddMaterial}
                   disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
-                  className="bg-slate-800 hover:bg-slate-900 text-white"
+                  className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
                   type="button"
                 >
                   <Plus className="h-4 w-4 mr-2" /> Add
@@ -248,27 +248,27 @@ export function ProductMaterialsDialog({
           </Table>
         </div>
 
-        <DialogFooter className="flex flex-row gap-2 border-t pt-4">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-6">
           <DialogClose asChild>
-            <Button onClick={handleCancel}>Close</Button>
+            <Button className="w-full sm:w-auto" onClick={handleCancel}>Close</Button>
           </DialogClose>
           
-          <div className="flex-1" />
+          <div className="flex-1 hidden sm:block" />
 
           {isEditing ? (  
-            <>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+              <Button className="w-full sm:w-auto text-red-500 hover:bg-red-50" onClick={handleCancel}>
+                Cancel
+              </Button>
               <Button 
-                className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]" 
+                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]" 
                 onClick={handleSave}
               >
                 Confirm
               </Button>
-              <Button className="text-red-500 hover:bg-red-50" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
+            </div>
           ) : (
-            <Button className="bg-slate-800 hover:bg-slate-900 text-white min-w-[100px]" onClick={handleEdit}>
+            <Button className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white min-w-[100px]" onClick={handleEdit}>
               Edit
             </Button>
           )}

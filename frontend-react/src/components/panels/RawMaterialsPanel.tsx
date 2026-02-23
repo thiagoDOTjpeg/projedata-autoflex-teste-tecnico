@@ -1,7 +1,9 @@
 import { fetchRawMaterials } from "@/store/features/rawMaterialsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import type { RawMaterial } from "@/types/product";
 import { Edit, Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { RawMaterialEditDialog } from "../raw-materials/RawMaterialEditDialog";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import {
@@ -16,6 +18,19 @@ import {
 export function RawMaterialsPanel() {
   const dispatch = useAppDispatch();
   const { rawMaterials, loading, error } = useAppSelector((state) => state.rawMaterials);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedMaterial, setSelectedMaterial] = useState<RawMaterial | null>(null);
+
+  const handleEditClick = (material: RawMaterial) => {
+    setSelectedMaterial(material);
+    setIsEditOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    setIsEditOpen(false);
+    setSelectedMaterial(null);
+  };
 
   useEffect(() => {
     dispatch(fetchRawMaterials());
@@ -54,7 +69,7 @@ export function RawMaterialsPanel() {
                 <TableCell>{rm.stockQuantity}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button size="icon">
+                    <Button size="icon" onClick={() => handleEditClick(rm)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button size="icon" className="hover:text-red-600">
@@ -67,6 +82,12 @@ export function RawMaterialsPanel() {
           </TableBody>
         </Table>
       </div>
+
+      <RawMaterialEditDialog
+        isOpen={isEditOpen}
+        onClose={handleCloseEdit}
+        material={selectedMaterial}
+      />
     </div>
   );
 }

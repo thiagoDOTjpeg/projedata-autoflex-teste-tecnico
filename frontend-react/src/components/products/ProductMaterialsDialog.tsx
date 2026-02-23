@@ -113,7 +113,7 @@ export function ProductMaterialsDialog({
       <DialogContent className="max-h-[85vh] min-w-[650px] flex flex-col" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-800">
-            Manufacturing Requirements: {product.name}
+            Manufacturing Materials: {product.name}
           </DialogTitle>
         </DialogHeader>
 

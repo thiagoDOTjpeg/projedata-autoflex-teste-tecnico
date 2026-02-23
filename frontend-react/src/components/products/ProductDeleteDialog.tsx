@@ -1,12 +1,12 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { deleteProduct } from "@/store/features/productsSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -43,10 +43,10 @@ export function ProductDeleteDialog({
         </DialogHeader>
         <DialogFooter className="flex flex-row gap-2 border-t pt-4 mt-4">
           <DialogClose asChild>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+            <Button onClick={() => onOpenChange(false)}>Cancel</Button>
           </DialogClose>
           <div className="flex-1" />
-          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+          <Button onClick={handleDelete}>Delete</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

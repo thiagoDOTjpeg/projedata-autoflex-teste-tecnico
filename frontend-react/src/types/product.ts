@@ -11,6 +11,11 @@ export interface RawMaterial {
   stockQuantity: number;
 }
 
+export interface RawMaterialRequest {
+  name: string;
+  stockQuantity: number;
+}
+
 export interface ProductMaterial {
   rawMaterial: RawMaterial;
   requiredQuantity: number;

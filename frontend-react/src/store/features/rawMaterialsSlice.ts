@@ -1,4 +1,4 @@
-import type { RawMaterial } from "@/types/product";
+import type { RawMaterial, RawMaterialRequest } from "@/types/product";
 import { createAsyncThunk, createSlice, isPending, isRejected } from "@reduxjs/toolkit";
 import { rawMaterialsService } from "../../services/rawMaterialsService";
 
@@ -17,6 +17,11 @@ const initialState: RawMaterialsState = {
 export const fetchRawMaterials = createAsyncThunk(
   "rawMaterials/fetchRawMaterials",
   async () => await rawMaterialsService.getRawMaterials()
+);
+
+export const createRawMaterial = createAsyncThunk(
+  "rawMaterials/createRawMaterial",
+  async (payload: RawMaterialRequest) => await rawMaterialsService.createRawMaterial(payload)
 );
 
 export const updateRawMaterial = createAsyncThunk(
@@ -49,19 +54,23 @@ export const rawMaterialsSlice = createSlice({
           state.rawMaterials[index] = action.payload;
         }
       })
+      .addCase(createRawMaterial.fulfilled, (state, action) => {
+        state.loading = false;
+        state.rawMaterials.push(action.payload);
+      })
       .addCase(deleteRawMaterial.fulfilled, (state, action) => {
         state.loading = false;
         state.rawMaterials = state.rawMaterials.filter(m => m.id !== action.payload);
       })
       .addMatcher(
-        isPending(fetchRawMaterials, updateRawMaterial, deleteRawMaterial),
+        isPending(fetchRawMaterials, updateRawMaterial, createRawMaterial, deleteRawMaterial),
         (state) => {
           state.loading = true;
           state.error = null;
         }
       )
       .addMatcher(
-        isRejected(fetchRawMaterials, updateRawMaterial, deleteRawMaterial),
+        isRejected(fetchRawMaterials, updateRawMaterial, createRawMaterial, deleteRawMaterial),
         (state, action) => {
           state.loading = false;
           state.error = action.error.message || "Operation failed";

@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RawMaterial } from "@/types/product";
 import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { RawMaterialCreateDialog } from "../raw-materials/RawMaterialCreateDialog";
 import { RawMaterialDeleteDialog } from "../raw-materials/RawMaterialDeleteDialog";
 import { RawMaterialEditDialog } from "../raw-materials/RawMaterialEditDialog";
 import { Button } from "../ui/button";
@@ -22,6 +23,7 @@ export function RawMaterialsPanel() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<RawMaterial | null>(null);
 
   const handleEditClick = (material: RawMaterial) => {
@@ -63,7 +65,12 @@ export function RawMaterialsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button className="text-white bg-emerald-600 hover:bg-emerald-700">New Raw Material</Button>
+        <Button 
+          className="text-white bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => setIsCreateOpen(true)}
+        >
+          New Raw Material
+        </Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm">
         <Table>
@@ -105,6 +112,11 @@ export function RawMaterialsPanel() {
         isOpen={isDeleteOpen}
         onClose={handleCloseDelete}
         material={selectedMaterial}
+      />
+
+      <RawMaterialCreateDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
       />
     </div>
   );

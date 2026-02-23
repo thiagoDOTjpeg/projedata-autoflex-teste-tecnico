@@ -59,7 +59,7 @@ export function ProductEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>

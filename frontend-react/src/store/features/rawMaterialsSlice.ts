@@ -82,3 +82,6 @@ export const rawMtaerialsSlice = createSlice({
       });
   }
 })
+
+
+export default rawMtaerialsSlice.reducer;

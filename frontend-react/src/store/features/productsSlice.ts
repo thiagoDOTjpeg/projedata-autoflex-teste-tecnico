@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import type { Product, ProductMaterial, ProductMaterialUpdate, ProductUpdate } from '../../types/product';
+import type { Product, ProductMaterial, ProductMaterialUpdate, ProductRequest, ProductUpdate } from '../../types/product';
 
 interface ProductsState {
   products: Product[];
@@ -59,6 +59,24 @@ export const updateProduct = createAsyncThunk(
     }
     const data = await response.json();
     return { productId, product: data as Product };
+  }
+)
+
+export const createProduct = createAsyncThunk(
+  'products/createProduct',
+  async (payload: ProductRequest) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8081'}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create product');
+    }
+    const data = await response.json();
+    return data as Product;
   }
 )
 
@@ -171,6 +189,18 @@ export const productsSlice = createSlice({
         state.loading = false;
         state.error = action.error.message || 'Failed to delete product';
       })
+      .addCase(createProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products.push(action.payload);
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to create product';
+      });
   },
 });
 

@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { Edit, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ProductCreateDialog } from "../products/ProductCreateDialog";
 import { ProductEditDialog } from "../products/ProductEditDialog";
 import { ProductMaterialsDialog } from "../products/ProductMaterialsDialog";
 
@@ -23,6 +24,7 @@ export function ProductsPanel() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -54,7 +56,12 @@ export function ProductsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button className="text-white bg-emerald-600 hover:bg-emerald-700">New Product</Button>
+        <Button 
+          className="text-white bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => setIsCreateDialogOpen(true)}
+        >
+          New Product
+        </Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm">
         <Table>
@@ -110,6 +117,10 @@ export function ProductsPanel() {
         product={selectedProduct}
         open={isEditDetailsOpen}
         onOpenChange={setIsEditDetailsOpen}
+      />
+      <ProductCreateDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
       />
     </div>
   );

@@ -28,3 +28,12 @@ export interface ProductUpdate {
   price?: number;
 }
 
+export interface ProductRequest {
+  name: string;
+  price: number;
+  materials: {
+    materialId: string;
+    quantity: number;
+  }[];
+}
+

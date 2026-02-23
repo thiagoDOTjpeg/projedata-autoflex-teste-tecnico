@@ -15,6 +15,8 @@ CREATE TABLE product_materials (
                                    material_id NUMBER NOT NULL,
                                    required_quantity NUMBER(19, 2) NOT NULL,
                                    CONSTRAINT pk_product_materials PRIMARY KEY (product_id, material_id),
-                                   CONSTRAINT fk_pm_product FOREIGN KEY (product_id) REFERENCES products(id),
-                                   CONSTRAINT fk_pm_material FOREIGN KEY (material_id) REFERENCES raw_materials(id)
+                                   CONSTRAINT fk_pm_product FOREIGN KEY (product_id)
+                                       REFERENCES products(id) ON DELETE CASCADE,
+                                   CONSTRAINT fk_pm_material FOREIGN KEY (material_id)
+                                       REFERENCES raw_materials(id) ON DELETE CASCADE
 );

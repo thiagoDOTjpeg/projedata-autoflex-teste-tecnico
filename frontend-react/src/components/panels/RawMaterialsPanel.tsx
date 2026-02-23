@@ -1,9 +1,7 @@
 import { fetchRawMaterials } from "@/store/features/rawMaterialsSlice";
-import { store } from "@/store/store";
-import type { RawMaterial } from "@/types/product";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Edit, Trash2 } from "lucide-react";
-import { Suspense, use } from "react";
-import ErrorBoundary from "../ErrorBoundary";
+import { useEffect } from "react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 import {
@@ -15,39 +13,64 @@ import {
   TableRow,
 } from "../ui/table";
 
-let rawMaterialsPromise: Promise<RawMaterial[]> | null = null;
+export function RawMaterialsPanel() {
+  const dispatch = useAppDispatch();
+  const { rawMaterials, loading, error } = useAppSelector((state) => state.rawMaterials);
 
-function getProductsPromise() {
-  if (!rawMaterialsPromise) {
-    rawMaterialsPromise = store.dispatch(fetchRawMaterials()).unwrap();
+  useEffect(() => {
+    dispatch(fetchRawMaterials());
+  }, [dispatch]);
+
+  if (loading && rawMaterials.length === 0) {
+    return <RawMaterialsTableSkeleton />;
   }
-  return rawMaterialsPromise;
-}
 
-function RawMaterialsTableContent() {
-  const products = use(getProductsPromise());
+  if (error) { 
+    return (
+      <div className="p-4 text-center text-red-500 border rounded-md bg-red-50">
+        Error: {error}
+      </div>
+    );
+  }
 
   return (
-    <>
-      {products.map((rm) => (
-        <TableRow key={rm.id}>
-          <TableCell className="font-medium">{rm.name}</TableCell>
-          <TableCell>{rm.stockQuantity}</TableCell>
-          <TableCell className="text-right">
-            <div className="flex justify-end gap-2">
-              <Button>
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button className="hover:text-red-600">
-                <Trash2 className="h-4 w-4 transition-colors duration-200" />
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
-      ))}
-    </>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button className="text-white bg-emerald-600 hover:bg-emerald-700">New Raw Material</Button>
+      </div>
+      <div className="rounded-md border bg-white shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Stock Quantity</TableHead>
+              <TableHead className="w-32 text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rawMaterials.map((rm) => (
+              <TableRow key={rm.id}>
+                <TableCell className="font-medium">{rm.name}</TableCell>
+                <TableCell>{rm.stockQuantity}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" className="hover:text-red-600">
+                      <Trash2 className="h-4 w-4 transition-colors duration-200" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
   );
 }
+
 
 function RawMaterialsTableSkeleton() {
   return (
@@ -69,44 +92,5 @@ function RawMaterialsTableSkeleton() {
         </TableRow>
       ))}
     </>
-  );
-}
-
-export function RawMaterialsPanel() {
-  return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button className="text-white">New Raw Material</Button>
-      </div>
-      <div className="rounded-md border bg-white shadow-sm">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Stock Quantity</TableHead>
-              <TableHead className="w-25 text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <ErrorBoundary
-              fallback={
-                <TableRow>
-                  <TableCell
-                    colSpan={3}
-                    className="h-24 text-center text-red-500"
-                  >
-                    Error: Occurred an error while getting the products!
-                  </TableCell>
-                </TableRow>
-              }
-            >
-              <Suspense fallback={<RawMaterialsTableSkeleton />}>
-                <RawMaterialsTableContent />
-              </Suspense>
-            </ErrorBoundary>
-          </TableBody>
-        </Table>
-      </div>
-    </div>
   );
 }

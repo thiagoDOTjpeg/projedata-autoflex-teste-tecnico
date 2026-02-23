@@ -18,6 +18,12 @@ public class RawMaterialResource {
   @Inject
   RawMaterialService rawMaterialService;
 
+  @POST
+  public Response create(RawMaterialRequestDTO dto) {
+    RawMaterial material = rawMaterialService.saveRawMaterial(dto);
+    return Response.status(Response.Status.CREATED).entity(material).build();
+  }
+
   @GET
   public Response listAll(){
     List<RawMaterial> materials = rawMaterialService.getAllRawMaterials();

@@ -8,31 +8,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { deleteProduct, fetchProducts } from "@/store/features/productsSlice";
+import { fetchProducts } from "@/store/features/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { Edit, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProductCreateDialog } from "../products/ProductCreateDialog";
+import { ProductDeleteDialog } from "../products/ProductDeleteDialog";
 import { ProductEditDialog } from "../products/ProductEditDialog";
 import { ProductMaterialsDialog } from "../products/ProductMaterialsDialog";
 
 export function ProductsPanel() {
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector((state) => state.products);
-  
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
-
-   const handleDelete = async (productId: string) => {
-        await dispatch(deleteProduct(productId))
-    };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -97,7 +94,14 @@ export function ProductsPanel() {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button  size="icon" className="hover:text-red-600" onClick={() => handleDelete(product.id)}  >
+                    <Button  
+                      size="icon" 
+                      className="hover:text-red-600" 
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -121,6 +125,11 @@ export function ProductsPanel() {
       <ProductCreateDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+      />
+      <ProductDeleteDialog
+        product={selectedProduct}
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
       />
     </div>
   );

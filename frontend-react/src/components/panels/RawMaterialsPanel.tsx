@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { RawMaterial } from "@/types/product";
 import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { RawMaterialDeleteDialog } from "../raw-materials/RawMaterialDeleteDialog";
 import { RawMaterialEditDialog } from "../raw-materials/RawMaterialEditDialog";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
@@ -20,6 +21,7 @@ export function RawMaterialsPanel() {
   const { rawMaterials, loading, error } = useAppSelector((state) => state.rawMaterials);
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState<RawMaterial | null>(null);
 
   const handleEditClick = (material: RawMaterial) => {
@@ -27,8 +29,18 @@ export function RawMaterialsPanel() {
     setIsEditOpen(true);
   };
 
+  const handleDeleteClick = (material: RawMaterial) => {
+    setSelectedMaterial(material);
+    setIsDeleteOpen(true);
+  };
+
   const handleCloseEdit = () => {
     setIsEditOpen(false);
+    setSelectedMaterial(null);
+  };
+
+  const handleCloseDelete = () => {
+    setIsDeleteOpen(false);
     setSelectedMaterial(null);
   };
 
@@ -72,7 +84,7 @@ export function RawMaterialsPanel() {
                     <Button size="icon" onClick={() => handleEditClick(rm)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" className="hover:text-red-600">
+                    <Button size="icon" className="hover:text-red-600" onClick={() => handleDeleteClick(rm)}>
                       <Trash2 className="h-4 w-4 transition-colors duration-200" />
                     </Button>
                   </div>
@@ -86,6 +98,12 @@ export function RawMaterialsPanel() {
       <RawMaterialEditDialog
         isOpen={isEditOpen}
         onClose={handleCloseEdit}
+        material={selectedMaterial}
+      />
+
+      <RawMaterialDeleteDialog
+        isOpen={isDeleteOpen}
+        onClose={handleCloseDelete}
         material={selectedMaterial}
       />
     </div>

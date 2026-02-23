@@ -9,5 +9,8 @@ export const rawMaterialsService = {
     apiClient.put<RawMaterial>(`/raw-materials/${material.id}`, {
       name: material.name,
       stockQuantity: material.stockQuantity,
-    })
+    }),
+
+  deleteRawMaterial: (id: string) =>
+    apiClient.delete<void>(`/raw-materials/${id}`),
 };

@@ -24,6 +24,14 @@ export const updateRawMaterial = createAsyncThunk(
   async (material: RawMaterial) => await rawMaterialsService.updateRawMaterial(material)
 );
 
+export const deleteRawMaterial = createAsyncThunk(
+  "rawMaterials/deleteRawMaterial",
+  async (id: string) => {
+    await rawMaterialsService.deleteRawMaterial(id);
+    return id;
+  }
+);
+
 export const rawMaterialsSlice = createSlice({
   name: "rawMaterials",
   initialState,
@@ -41,15 +49,19 @@ export const rawMaterialsSlice = createSlice({
           state.rawMaterials[index] = action.payload;
         }
       })
+      .addCase(deleteRawMaterial.fulfilled, (state, action) => {
+        state.loading = false;
+        state.rawMaterials = state.rawMaterials.filter(m => m.id !== action.payload);
+      })
       .addMatcher(
-        isPending(fetchRawMaterials, updateRawMaterial),
+        isPending(fetchRawMaterials, updateRawMaterial, deleteRawMaterial),
         (state) => {
           state.loading = true;
           state.error = null;
         }
       )
       .addMatcher(
-        isRejected(fetchRawMaterials, updateRawMaterial),
+        isRejected(fetchRawMaterials, updateRawMaterial, deleteRawMaterial),
         (state, action) => {
           state.loading = false;
           state.error = action.error.message || "Operation failed";

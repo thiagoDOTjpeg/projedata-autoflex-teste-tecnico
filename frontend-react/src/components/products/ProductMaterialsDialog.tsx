@@ -15,12 +15,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { deleteProductMaterials, fetchProducts, updateProductMaterials } from "@/store/features/productsSlice";
-import { useAppDispatch } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product, ProductMaterial } from "@/types/product";
-import { Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface ProductMaterialsDialogProps {
   product: Product | null;
@@ -34,8 +35,11 @@ export function ProductMaterialsDialog({
   onOpenChange,
 }: ProductMaterialsDialogProps) {
   const dispatch = useAppDispatch();
+  const { rawMaterials } = useAppSelector((state) => state.rawMaterials);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMaterials, setEditedMaterials] = useState<ProductMaterial[]>([]);
+  const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] = useState("");
+  const [selectedQuantity, setSelectedQuantity] = useState("");
 
   useEffect(() => {
     if (product?.materials) {
@@ -86,6 +90,30 @@ export function ProductMaterialsDialog({
     }
   };
 
+  const handleAddMaterial = () => {
+    if (!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0) return;
+
+    const rawMaterial = rawMaterials.find(rm => String(rm.id) === selectedRawMaterialSelect);
+    if (!rawMaterial) {
+      return;
+    }
+
+    if (editedMaterials.some(m => String(m.rawMaterial.id) === String(rawMaterial.id))) {
+      return;
+    }
+
+    setEditedMaterials((prev) => [
+      ...prev,
+      {
+        rawMaterial,
+        requiredQuantity: Number(selectedQuantity),
+      }
+    ]);
+    
+    setSelectedRawMaterialSelect("");
+    setSelectedQuantity("");
+  };
+
   const handleSave = async () => {
     const payload = {
       materials: editedMaterials.map((m) => ({
@@ -117,7 +145,55 @@ export function ProductMaterialsDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 overflow-y-auto py-4 space-y-6">
+          {isEditing && (
+            <div className="space-y-4">
+              <h3 className="font-semibold text-slate-800">Add Raw Material</h3>
+              <div className="flex items-end gap-4 p-4 rounded-md border bg-slate-50">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="material">Select Material</Label>
+                  <select
+                    id="material"
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={selectedRawMaterialSelect}
+                    onChange={(e) => setSelectedRawMaterialSelect(e.target.value)}
+                  >
+                    <option value="" disabled>Choose a material...</option>
+                    {rawMaterials.map((material) => (
+                      <option
+                        key={material.id}
+                        value={material.id}
+                        disabled={editedMaterials.some((m) => String(m.rawMaterial.id) === String(material.id))}
+                      >
+                        {material.name} (Stock: {material.stockQuantity})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="w-32 space-y-2">
+                  <Label htmlFor="quantity">Quantity</Label>
+                  <Input
+                    id="quantity"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={selectedQuantity}
+                    onChange={(e) => setSelectedQuantity(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <Button 
+                  onClick={handleAddMaterial}
+                  disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
+                  className="bg-slate-800 hover:bg-slate-900 text-white"
+                  type="button"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50">

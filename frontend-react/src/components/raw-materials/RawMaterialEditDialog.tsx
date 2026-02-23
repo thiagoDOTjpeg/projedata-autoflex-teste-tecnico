@@ -57,7 +57,7 @@ export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterial
               <Input
                 id="stock"
                 type="number"
-                step="0.01"
+                step="1"
                 value={editingMaterial.stockQuantity}
                 onChange={(e) => setEditingMaterial({ ...editingMaterial, stockQuantity: parseFloat(e.target.value) || 0 })}
                 className="col-span-3"

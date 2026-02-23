@@ -1,10 +1,11 @@
 package com.autoflex.inventory.presentation.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record ProductRequestDTO(
         String name,
-        Double price,
+        BigDecimal price,
         List<MaterialAmountDTO> materials
 ) {
 }

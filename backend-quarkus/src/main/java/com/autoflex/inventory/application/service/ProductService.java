@@ -95,14 +95,13 @@ public class ProductService {
           availableStock.merge(formula.rawMaterial.id, -totalUsed, Double::sum);
         }
 
-        BigDecimal price = BigDecimal.valueOf(p.price);
         BigDecimal quantity = BigDecimal.valueOf(maxUnitsForProduct);
 
         suggestions.add(new ProductionSuggestionDTO(
                 p.name,
                 (int) maxUnitsForProduct,
-                price,
-                price.multiply(quantity)
+                p.price,
+                p.price.multiply(quantity)
         ));
       }
     }

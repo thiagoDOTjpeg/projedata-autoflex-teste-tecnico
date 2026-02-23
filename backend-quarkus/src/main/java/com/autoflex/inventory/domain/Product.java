@@ -3,6 +3,7 @@ package com.autoflex.inventory.domain;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class Product extends PanacheEntityBase {
   public Long id;
   public String name;
   @Column(columnDefinition = "NUMBER(19,2)")
-  public Double price;
+  public BigDecimal price;
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   public List<ProductMaterial> materials = new ArrayList<>();

@@ -1,9 +1,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
 
+import { ApiError } from "@/lib/api-errors";
+import type { ProblemDetail } from "@/types/api";
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/problem+json")) {
+      const problemDetail: ProblemDetail = await response.json().catch(() => ({}));
+      throw new ApiError(problemDetail.title || 'API Error', problemDetail, response.status);
+    }
     const errorDetails = await response.text().catch(() => '');
-    throw new Error(`API Error: ${response.statusText} ${errorDetails}`);
+    throw new ApiError(`API Error: ${response.statusText} ${errorDetails}`, undefined, response.status);
   }
 
   const text = await response.text();

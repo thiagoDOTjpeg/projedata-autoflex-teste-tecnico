@@ -7,6 +7,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Form,
+  FormField,
+  FormItem,
+  FormMessage
+} from "@/components/ui/form";
+import {
   Table,
   TableBody,
   TableCell,
@@ -14,11 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ApiError } from "@/lib/api-errors";
+import { productMaterialsUpdateSchema as formSchema, type ProductMaterialsUpdateFormValues as FormValues } from "@/schemas/product";
 import { deleteProductMaterials, fetchProducts, updateProductMaterials } from "@/store/features/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import type { Product, ProductMaterial } from "@/types/product";
+import type { Product } from "@/types/product";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -37,54 +48,94 @@ export function ProductMaterialsDialog({
   const dispatch = useAppDispatch();
   const { rawMaterials } = useAppSelector((state) => state.rawMaterials);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedMaterials, setEditedMaterials] = useState<ProductMaterial[]>([]);
   const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] = useState("");
   const [selectedQuantity, setSelectedQuantity] = useState("");
 
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { materials: [] }
+  });
+
+  const { materials } = form.watch();
+
   useEffect(() => {
-    if (product?.materials) {
-      setEditedMaterials([...product.materials]);
-    } else {
-      setEditedMaterials([]);
+    if (open && !isEditing) {
+      if (product?.materials) {
+        form.reset({
+          materials: product.materials.map((m) => ({
+            materialId: String(m.rawMaterial.id),
+            name: m.rawMaterial.name,
+            quantity: m.requiredQuantity,
+          })),
+        });
+      } else {
+        form.reset({ materials: [] });
+      }
     }
-  }, [product, product?.materials]);
+  }, [product, open, isEditing, form]);
 
   if (!product) return null;
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
     setIsEditing(true);
-    if (product.materials) {
-      setEditedMaterials([...product.materials]);
-    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     if (product.materials) {
-      setEditedMaterials([...product.materials]);
+      form.reset({
+        materials: product.materials.map((m) => ({
+          materialId: String(m.rawMaterial.id),
+          name: m.rawMaterial.name,
+          quantity: m.requiredQuantity,
+        })),
+      });
     }
+    setSelectedRawMaterialSelect("");
+    setSelectedQuantity("");
   };
 
   const handleQuantityChange = (materialId: string, quantity: number) => {
-    setEditedMaterials((prev) =>
-      prev.map((material) =>
-        material.rawMaterial.id === materialId
-          ? { ...material, requiredQuantity: quantity }
-          : material
-      )
+    form.setValue(
+      "materials",
+      materials.map((m) =>
+        m.materialId === materialId ? { ...m, quantity } : m
+      ),
+      { shouldValidate: true }
     );
   };
 
   const handleDelete = async (materialId: string) => {
+    if (materials.length <= 1) {
+      toast.error("A product must have at least one raw material.");
+      return;
+    }
+
     if (isEditing) {
-      setEditedMaterials((prev) => prev.filter((m) => m.rawMaterial.id !== materialId));
+      form.setValue(
+        "materials",
+        materials.filter((m) => m.materialId !== materialId),
+        { shouldValidate: true }
+      );
     } else {
       try {
-        setEditedMaterials((prev) => prev.filter((m) => m.rawMaterial.id !== materialId));
-        
         await dispatch(deleteProductMaterials({ productId: product.id, materialId })).unwrap();
         await dispatch(fetchProducts());
+        toast.success("Material removed successfully");
+        form.setValue(
+          "materials",
+          materials.filter((m) => m.materialId !== materialId),
+          { shouldValidate: true }
+        );
       } catch (error) {
+        if (error instanceof ApiError && error.problemDetail) {
+          toast.error(error.problemDetail.title || "Validation Error", {
+            description: error.problemDetail.detail
+          });
+        } else {
+          toast.error("Failed to delete product material");
+        }
         console.error("Failed to delete product material:", error);
       }
     }
@@ -94,38 +145,47 @@ export function ProductMaterialsDialog({
     if (!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0) return;
 
     const rawMaterial = rawMaterials.find(rm => String(rm.id) === selectedRawMaterialSelect);
-    if (!rawMaterial) {
-      return;
-    }
+    if (!rawMaterial) return;
 
-    if (editedMaterials.some(m => String(m.rawMaterial.id) === String(rawMaterial.id))) {
-      return;
-    }
+    if (materials.some(m => String(m.materialId) === String(rawMaterial.id))) return;
 
-    setEditedMaterials((prev) => [
-      ...prev,
+    form.setValue("materials", [
+      ...materials,
       {
-        rawMaterial,
-        requiredQuantity: Number(selectedQuantity),
+        materialId: String(rawMaterial.id),
+        name: rawMaterial.name,
+        quantity: Number(selectedQuantity),
       }
-    ]);
+    ], { shouldValidate: true });
     
     setSelectedRawMaterialSelect("");
     setSelectedQuantity("");
   };
 
-  const handleSave = async () => {
+  const onSubmit = async (values: FormValues) => {
     const payload = {
-      materials: editedMaterials.map((m) => ({
-        materialId: m.rawMaterial.id,
-        quantity: Number(m.requiredQuantity),
+      materials: values.materials.map((m) => ({
+        materialId: m.materialId,
+        quantity: m.quantity,
       })),
     };
     
     try {
       await dispatch(updateProductMaterials({ productId: product.id, payload })).unwrap();
+      await dispatch(fetchProducts());
       setIsEditing(false);
+      toast.success("Materials updated successfully!");
     } catch (error) {
+      if (error instanceof ApiError && error.problemDetail) {
+        toast.error(error.problemDetail.title || "Validation Error", {
+          description: error.problemDetail.detail,
+        });
+        error.problemDetail.errors?.forEach((err) => {
+          toast.error(`Field '${err.field}': ${err.message}`);
+        });
+      } else {
+        toast.error("Failed to update product materials");
+      }
       console.error("Failed to update product materials:", error);
     }
   };
@@ -135,7 +195,10 @@ export function ProductMaterialsDialog({
       open={open} 
       onOpenChange={(value) => { 
         onOpenChange(value); 
-        if (!value) setIsEditing(false); 
+        if (!value) {
+          setIsEditing(false);
+          form.reset();
+        }
       }} 
     >
       <DialogContent className="max-h-[85vh] w-[95vw] max-w-[650px] flex flex-col" showCloseButton={false}>
@@ -145,134 +208,149 @@ export function ProductMaterialsDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6">
-          {isEditing && (
-            <div className="space-y-4">
-              <h3 className="font-semibold text-slate-800">Add Raw Material</h3>
-              <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
-                <div className="flex-1 space-y-2 w-full">
-                  <Label htmlFor="material">Select Material</Label>
-                  <select
-                    id="material"
-                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={selectedRawMaterialSelect}
-                    onChange={(e) => setSelectedRawMaterialSelect(e.target.value)}
-                  >
-                    <option value="" disabled>Choose a material...</option>
-                    {rawMaterials.map((material) => (
-                      <option
-                        key={material.id}
-                        value={material.id}
-                        disabled={editedMaterials.some((m) => String(m.rawMaterial.id) === String(material.id))}
-                      >
-                        {material.name} (Stock: {material.stockQuantity})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="w-full sm:w-32 space-y-2">
-                  <Label htmlFor="quantity">Quantity</Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={selectedQuantity}
-                    onChange={(e) => setSelectedQuantity(e.target.value)}
-                    placeholder="0"
-                  />
-                </div>
-                <Button 
-                  onClick={handleAddMaterial}
-                  disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
-                  className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
-                  type="button"
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add
-                </Button>
-              </div>
-            </div>
-          )}
-          
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50">
-                <TableHead className="font-bold">Material</TableHead>
-                <TableHead className="text-right font-bold">Quantity Required</TableHead>
-                <TableHead className="text-right font-bold w-20">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {editedMaterials.length > 0 ? (
-                editedMaterials.map((material) => (
-                  <TableRow key={material.rawMaterial.id} className="hover:bg-slate-50/50">
-                    <TableCell className="font-medium">{material.rawMaterial.name}</TableCell>
-                    <TableCell className="text-right">
-                      {isEditing ? (
-                        <div className="flex justify-end">
-                           <Input
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6 flex flex-col">
+            <FormField
+              control={form.control}
+              name="materials"
+              render={() => (
+                <FormItem className="space-y-4">
+                  <FormMessage />
+                  
+                  {isEditing && (
+                    <div className="space-y-4">
+                      <h3 className="font-semibold text-slate-800">Add Raw Material</h3>
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
+                        <div className="flex-1 space-y-2 w-full">
+                          <Label htmlFor="material">Select Material</Label>
+                          <select
+                            id="material"
+                            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            value={selectedRawMaterialSelect}
+                            onChange={(e) => setSelectedRawMaterialSelect(e.target.value)}
+                          >
+                            <option value="" disabled>Choose a material...</option>
+                            {rawMaterials.map((material) => (
+                              <option
+                                key={material.id}
+                                value={material.id}
+                                disabled={materials.some((m) => String(m.materialId) === String(material.id))}
+                              >
+                                {material.name} (Stock: {material.stockQuantity})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="w-full sm:w-32 space-y-2">
+                          <Label htmlFor="quantity">Quantity</Label>
+                          <Input
+                            id="quantity"
                             type="number"
-                            min="0"
+                            min="1"
                             step="1"
-                            className="w-24 text-right focus:ring-emerald-500"
-                            value={material.requiredQuantity}
-                            onChange={(e) => handleQuantityChange(material.rawMaterial.id, Number(e.target.value))}
+                            value={selectedQuantity}
+                            onChange={(e) => setSelectedQuantity(e.target.value)}
+                            placeholder="0"
                           />
                         </div>
-                       ) : (
-                        <span className="font-mono">{material.requiredQuantity}</span>
+                        <Button 
+                          onClick={handleAddMaterial}
+                          disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
+                          className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
+                          type="button"
+                        >
+                          <Plus className="h-4 w-4 mr-2" /> Add
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-slate-50">
+                        <TableHead className="font-bold">Material</TableHead>
+                        <TableHead className="text-right font-bold">Quantity Required</TableHead>
+                        <TableHead className="text-right font-bold w-20">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {materials.length > 0 ? (
+                        materials.map((material) => (
+                          <TableRow key={material.materialId} className="hover:bg-slate-50/50">
+                            <TableCell className="font-medium">{material.name}</TableCell>
+                            <TableCell className="text-right">
+                              {isEditing ? (
+                                <div className="flex justify-end">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    className="w-24 text-right focus:ring-emerald-500"
+                                    value={material.quantity}
+                                    onChange={(e) => handleQuantityChange(material.materialId, Number(e.target.value))}
+                                  />
+                                </div>
+                              ) : (
+                                <span className="font-mono">{material.quantity}</span>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button 
+                                type="button"
+                                size="icon"
+                                className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                onClick={() => handleDelete(material.materialId)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="h-32 text-center text-muted-foreground italic"
+                          >
+                            No materials required for this product.
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        size="icon" 
-                        className="text-slate-400 hover:text-red-600 transition-colors"
-                        onClick={() => handleDelete(material.rawMaterial.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={3}
-                    className="h-32 text-center text-muted-foreground italic"
-                  >
-                    No materials required for this product.
-                  </TableCell>
-                </TableRow>
+                    </TableBody>
+                  </Table>
+                </FormItem>
               )}
-            </TableBody>
-          </Table>
-        </div>
+            />
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-6">
-          <DialogClose asChild>
-            <Button className="w-full sm:w-auto" onClick={handleCancel}>Close</Button>
-          </DialogClose>
-          
-          <div className="flex-1 hidden sm:block" />
-
-          {isEditing ? (  
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
-              <Button className="w-full sm:w-auto text-red-500 hover:bg-red-50" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button 
-                className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]" 
-                onClick={handleSave}
-              >
-                Confirm
-              </Button>
-            </div>
-          ) : (
-            <Button className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white min-w-[100px]" onClick={handleEdit}>
-              Edit
-            </Button>
-          )}
-        </DialogFooter>
+            <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-auto">
+              {isEditing ? (
+                <>
+                  <Button type="button" className="w-full sm:w-auto text-red-500 hover:bg-red-50" onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                  <div className="flex-1 hidden sm:block" />
+                  <Button 
+                    type="submit"
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    Confirm
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <DialogClose asChild>
+                    <Button type="button" className="w-full sm:w-auto">Close</Button>
+                  </DialogClose>
+                  <div className="flex-1 hidden sm:block" />
+                  <Button type="button" className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white min-w-[100px]" onClick={handleEdit}>
+                    Edit
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

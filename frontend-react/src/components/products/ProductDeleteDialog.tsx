@@ -11,6 +11,7 @@ import {
 import { deleteProduct } from "@/store/features/productsSlice";
 import { useAppDispatch } from "@/store/hooks";
 import type { Product } from "@/types/product";
+import { toast } from "sonner";
 
 interface ProductDeleteDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export function ProductDeleteDialog({
   const handleDelete = async () => {
     if (product?.id) {
       await dispatch(deleteProduct(product.id));
+      toast.success("Product deleted successfully");  
       onOpenChange(false);
     }
   };

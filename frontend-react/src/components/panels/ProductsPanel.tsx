@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 import { fetchProducts } from "@/store/features/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import type { Product } from "@/types/product";
 import { Edit, Package, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { ProductCreateDialog } from "../products/ProductCreateDialog";
@@ -21,11 +20,13 @@ import { ProductMaterialsDialog } from "../products/ProductMaterialsDialog";
 export function ProductsPanel() {
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector((state) => state.products);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const selectedProduct = products.find((p) => p.id === selectedProductId) || null;
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -79,7 +80,7 @@ export function ProductsPanel() {
                     <Button
                       size="icon"
                       onClick={() => {
-                        setSelectedProduct(product);
+                        setSelectedProductId(product.id);
                         setIsDialogOpen(true);
                       }}
                     >
@@ -88,7 +89,7 @@ export function ProductsPanel() {
                     <Button
                       size="icon"
                       onClick={() => {
-                        setSelectedProduct(product);
+                        setSelectedProductId(product.id);
                         setIsEditDetailsOpen(true);
                       }}
                     >
@@ -98,7 +99,7 @@ export function ProductsPanel() {
                       size="icon" 
                       className="hover:text-red-600" 
                       onClick={() => {
-                        setSelectedProduct(product);
+                        setSelectedProductId(product.id);
                         setIsDeleteDialogOpen(true);
                       }}
                     >

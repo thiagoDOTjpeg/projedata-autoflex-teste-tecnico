@@ -8,10 +8,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ApiError } from "@/lib/api-errors";
 import { updateProduct } from "@/store/features/productsSlice";
 import { useAppDispatch } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Label } from "../ui/label";
 
 interface ProductEditDialogProps {
@@ -50,7 +52,18 @@ export function ProductEditDialog({
         })
       ).unwrap();
       onOpenChange(false);
+      toast.success("Product updated successfully");  
     } catch (error) {
+      if(error instanceof ApiError && error.problemDetail){ 
+        toast.error(error.problemDetail.title || "Validation Error", {
+          description: error.problemDetail.detail,
+        }); 
+        error.problemDetail.errors?.forEach((err) => {
+          toast.error(`Field '${err.field}': ${err.message}`);
+        });
+      } else {
+        toast.error("Failed to update product");
+      }
       console.error("Failed to update product:", error);
     }
   };

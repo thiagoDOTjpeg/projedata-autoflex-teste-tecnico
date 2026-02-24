@@ -6,6 +6,7 @@ import com.autoflex.inventory.presentation.dto.ProductRequestDTO;
 import com.autoflex.inventory.presentation.dto.ProductUpdateDTO;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -34,14 +35,14 @@ public class ProductResource {
   }
 
   @POST
-  public Response create(ProductRequestDTO dto) {
+  public Response create(@Valid ProductRequestDTO dto) {
     Product product = productService.saveProductWithMaterials(dto);
     return Response.status(Response.Status.CREATED).entity(product).build();
   }
 
   @PUT
   @Path("/{id}")
-  public Response update(Long id, ProductUpdateDTO dto) {
+  public Response update(Long id, @Valid ProductUpdateDTO dto) {
     Product product = productService.updateProductWithMaterials(id, dto);
     return Response.status(Response.Status.OK).entity(product).build();
   }

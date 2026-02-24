@@ -4,6 +4,7 @@ import com.autoflex.inventory.application.service.RawMaterialService;
 import com.autoflex.inventory.domain.RawMaterial;
 import com.autoflex.inventory.presentation.dto.RawMaterialRequestDTO;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -19,7 +20,7 @@ public class RawMaterialResource {
   RawMaterialService rawMaterialService;
 
   @POST
-  public Response create(RawMaterialRequestDTO dto) {
+  public Response create(@Valid RawMaterialRequestDTO dto) {
     RawMaterial material = rawMaterialService.saveRawMaterial(dto);
     return Response.status(Response.Status.CREATED).entity(material).build();
   }
@@ -32,7 +33,7 @@ public class RawMaterialResource {
 
   @PUT
   @Path("/{id}")
-  public Response update(Long id, RawMaterialRequestDTO dto) {
+  public Response update(Long id, @Valid RawMaterialRequestDTO dto) {
     RawMaterial material = rawMaterialService.updateRawMaterial(id, dto);
     return Response.status(Response.Status.CREATED).entity(material).build();
   }

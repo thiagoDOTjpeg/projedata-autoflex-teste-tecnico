@@ -6,6 +6,7 @@ import com.autoflex.inventory.domain.ProductMaterial;
 import com.autoflex.inventory.presentation.dto.MaterialAmountDTO;
 import com.autoflex.inventory.presentation.dto.ProductMaterialUpdateDTO;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -22,14 +23,14 @@ public class ProductMaterialResource {
 
   @POST
   @Path("/{productId}")
-  public Response add(Long productId, MaterialAmountDTO dto) {
+  public Response add(Long productId, @Valid MaterialAmountDTO dto) {
     Product product = productMaterialService.addMaterialToProduct(productId, dto);
     return Response.status(Response.Status.CREATED).entity(product).build();
   }
 
   @PUT
   @Path("/{productId}")
-  public Response update(Long productId, ProductMaterialUpdateDTO dto) {
+  public Response update(Long productId, @Valid ProductMaterialUpdateDTO dto) {
     List<ProductMaterial> pm = productMaterialService.updateMaterialInProduct(productId, dto);
     return Response.status(Response.Status.OK).entity(pm).build();
   }

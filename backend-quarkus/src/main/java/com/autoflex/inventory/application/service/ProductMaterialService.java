@@ -77,7 +77,7 @@ public class ProductMaterialService {
         newPm.persist();
       }
     }
-    return ProductMaterial.find("product.id", productId).list();
+    return ProductMaterial.findAllByProductId(productId);
   }
 
   @Transactional

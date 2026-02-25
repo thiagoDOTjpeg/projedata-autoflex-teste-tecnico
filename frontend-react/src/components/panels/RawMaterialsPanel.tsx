@@ -36,16 +36,6 @@ export function RawMaterialsPanel() {
     setIsDeleteOpen(true);
   };
 
-  const handleCloseEdit = () => {
-    setIsEditOpen(false);
-    setSelectedMaterial(null);
-  };
-
-  const handleCloseDelete = () => {
-    setIsDeleteOpen(false);
-    setSelectedMaterial(null);
-  };
-
   useEffect(() => {
     dispatch(fetchRawMaterials());
   }, [dispatch]);
@@ -104,13 +94,13 @@ export function RawMaterialsPanel() {
 
       <RawMaterialEditDialog
         isOpen={isEditOpen}
-        onClose={handleCloseEdit}
+        onOpenChange={setIsEditOpen}
         material={selectedMaterial}
       />
 
       <RawMaterialDeleteDialog
         isOpen={isDeleteOpen}
-        onClose={handleCloseDelete}
+        onOpenChange={setIsDeleteOpen}
         material={selectedMaterial}
       />
 

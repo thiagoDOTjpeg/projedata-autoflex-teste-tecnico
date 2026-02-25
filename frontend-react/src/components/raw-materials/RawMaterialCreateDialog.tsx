@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { ApiError } from "@/lib/api-errors";
 import { rawMaterialSchema, type RawMaterialFormValues } from "@/schemas/raw-material";
 import { createRawMaterial } from "@/store/features/rawMaterialsSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -45,46 +44,35 @@ export function RawMaterialCreateDialog({
   });
 
   useEffect(() => {
-    if (open) {
-      form.reset({
-        name: "",
-        stockQuantity: undefined,
-      });
+    if (!open) {
+      form.reset({ name: "", stockQuantity: undefined });
     }
   }, [open, form]);
 
   const onSubmit = async (data: RawMaterialFormValues) => {
     try {
-      await dispatch(createRawMaterial({
-        name: data.name,
-        stockQuantity: data.stockQuantity,
-      })).unwrap();
-      
+      await dispatch(createRawMaterial(data)).unwrap();
       toast.success("Raw material created successfully!");
       onOpenChange(false);
-    } catch (error) {
-      if (error instanceof ApiError && error.problemDetail) {
-        toast.error(error.problemDetail.title || "Validation Error", {
-          description: error.problemDetail.detail,
+    } catch (error: any) {
+      if (error && error.status === 400 && error.problemDetail) {
+      
+      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
+        const fieldName = err.field.split('.').pop() as any;
+
+        form.setError(fieldName, { 
+          type: "server", 
+          message: err.message 
         });
-        error.problemDetail.errors?.forEach((err) => {
-          form.setError(err.field as any, { type: "server", message: err.message });
-          toast.error(`Field '${err.field}': ${err.message}`);
-        });
+      });
       } else {
         toast.error("Failed to create raw material");
       }
-      console.error("Failed to create raw material:", error);
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    onOpenChange(false);
-  };
-
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Create New Raw Material</DialogTitle>
@@ -133,7 +121,7 @@ export function RawMaterialCreateDialog({
 
             <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-6">
               <DialogClose asChild>
-                <Button type="button" className="w-full sm:w-auto" onClick={handleClose}>Cancel</Button>
+                <Button type="button" className="w-full sm:w-auto">Cancel</Button>
               </DialogClose>
               <div className="flex-1 hidden sm:block" />
               <Button 

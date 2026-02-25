@@ -25,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ApiError } from "@/lib/api-errors";
 import { productCreateSchema as formSchema, type ProductCreateFormValues as FormValues } from "@/schemas/product";
 import { createProduct } from "@/store/features/productsSlice";
 import { fetchRawMaterials } from "@/store/features/rawMaterialsSlice";
@@ -119,19 +118,20 @@ export function ProductCreateDialog({
       onOpenChange(false);
       resetDialog();
       toast.success("Product created successfully!");
-    } catch (error) {
-      if (error instanceof ApiError && error.problemDetail) {
-        toast.error(error.problemDetail.title || "Validation Error", {
-          description: error.problemDetail.detail,
+    } catch (error: any) {
+     if (error && error.status === 400 && error.problemDetail) {
+      
+      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
+        const fieldName = err.field.split('.').pop() as any;
+
+        form.setError(fieldName, { 
+          type: "server", 
+          message: err.message 
         });
-        error.problemDetail.errors?.forEach((err) => {
-          form.setError(err.field as any, { type: "server", message: err.message });
-          toast.error(`Field '${err.field}': ${err.message}`);
-        });
+      });
       } else {
         toast.error("Failed to create product");
       }
-      console.error("Failed to create product:", error);
     }
   };
 

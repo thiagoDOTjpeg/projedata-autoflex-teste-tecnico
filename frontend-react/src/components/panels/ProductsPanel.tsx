@@ -21,7 +21,7 @@ export function ProductsPanel() {
   const dispatch = useAppDispatch();
   const { products, loading, error } = useAppSelector((state) => state.products);
   const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditProductMaterialsDialogOpen, setIsEditProductMaterialsDialogOpen] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -81,7 +81,7 @@ export function ProductsPanel() {
                       size="icon"
                       onClick={() => {
                         setSelectedProductId(product.id);
-                        setIsDialogOpen(true);
+                        setIsEditProductMaterialsDialogOpen(true);
                       }}
                     >
                       <Package className="h-4 w-4" />
@@ -115,8 +115,8 @@ export function ProductsPanel() {
 
       <ProductMaterialsDialog
         product={selectedProduct}
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        open={isEditProductMaterialsDialogOpen}
+        onOpenChange={setIsEditProductMaterialsDialogOpen}
       />
       <ProductEditDialog
         product={selectedProduct}

@@ -8,13 +8,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ApiError } from "@/lib/api-errors";
+import { productEditSchema, type ProductEditFormValues } from "@/schemas/product";
 import { updateProduct } from "@/store/features/productsSlice";
 import { useAppDispatch } from "@/store/hooks";
 import type { Product } from "@/types/product";
-import { useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { Label } from "../ui/label";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
 
 interface ProductEditDialogProps {
   product: Product | null;
@@ -28,17 +30,24 @@ export function ProductEditDialog({
   onOpenChange,
 }: ProductEditDialogProps) {
   const dispatch = useAppDispatch();
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+
+  const form = useForm<ProductEditFormValues>({
+    resolver: zodResolver(productEditSchema),
+    defaultValues: { name: "", price: undefined },
+  });
 
   useEffect(() => {
-    if (product) {
-      setName(product.name);
-      setPrice(String(product.price));
+    if (open && product) {
+      form.reset({
+        name: product.name,
+        price: product.price,
+      });
+    } else if (!open) {
+      form.reset();
     }
-  }, [product]);
+  }, [open, product, form]);
 
-  const handleSave = async () => {
+  const handleSave = async (data: ProductEditFormValues) => {
     if (!product) return;
 
     try {
@@ -46,20 +55,23 @@ export function ProductEditDialog({
         updateProduct({
           productId: product.id,
           payload: {
-            name,
-            price: parseFloat(price),
+            name: data.name,
+            price: data.price,
           },
         })
       ).unwrap();
-      onOpenChange(false);
       toast.success("Product updated successfully");  
-    } catch (error) {
-      if(error instanceof ApiError && error.problemDetail){ 
-        toast.error(error.problemDetail.title || "Validation Error", {
-          description: error.problemDetail.detail,
-        }); 
-        error.problemDetail.errors?.forEach((err) => {
-          toast.error(`Field '${err.field}': ${err.message}`);
+      onOpenChange(false);
+    } catch (error: any) {
+      if (error && error.status === 400 && error.problemDetail) {
+      
+      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
+        const fieldName = err.field.split('.').pop() as any;
+
+        form.setError(fieldName, { 
+          type: "server", 
+          message: err.message 
+          });
         });
       } else {
         toast.error("Failed to update product");
@@ -70,45 +82,72 @@ export function ProductEditDialog({
 
   if (!product) return null;
 
+  const handleClose = () => {
+    form.reset();
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="name" className="text-left sm:text-right">
-              Name
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="col-span-1 sm:col-span-3" 
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4 py-4">
+            <FormField  
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 space-y-0">
+                  <FormLabel className="text-left sm:text-right">Name</FormLabel>
+                  <div className="col-span-1 sm:col-span-3">
+                    <FormControl>
+                      <Input placeholder="e.g. Iron Ore" {...field} />
+                    </FormControl>
+                    <FormMessage className="mt-1" />
+                  </div>
+                </FormItem>
+              )}
             />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
-            <Label htmlFor="price" className="text-left sm:text-right">
-              Price
-            </Label>
-            <Input
-              id="price"
-              type="number"
-              step="0.01"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="col-span-1 sm:col-span-3"
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 space-y-0">
+                  <FormLabel className="text-left sm:text-right">Price</FormLabel>
+                  <div className="col-span-1 sm:col-span-3">
+                    <FormControl>
+                      <Input 
+                        type="number"
+                        placeholder="0"
+                        step="0.01"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
+                    <FormMessage className="mt-1" />
+                  </div>
+                </FormItem>
+              )}
             />
-          </div>
-        </div>
+         
+          
         <DialogFooter className="flex sm:flex-row flex-col gap-2 sm:gap-4 border-t pt-4 mt-4">
           <DialogClose asChild>
-            <Button className="w-full sm:w-auto">Cancel</Button>
+            <Button className="w-full sm:w-auto" onClick={handleClose}>Cancel</Button>
           </DialogClose>
           <div className="flex-1 hidden sm:block" />
-          <Button onClick={handleSave} className="w-full sm:w-auto">Save changes</Button>
+          <Button 
+          type="submit"
+          className="w-full sm:w-auto"
+          disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Saving..." : "Save changes"}
+            </Button>
         </DialogFooter>
+         </form> 
+        </Form>
       </DialogContent>
     </Dialog>
   );

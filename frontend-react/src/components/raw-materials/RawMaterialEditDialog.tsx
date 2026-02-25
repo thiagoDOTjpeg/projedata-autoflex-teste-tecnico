@@ -6,7 +6,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { ApiError } from "@/lib/api-errors";
 import { rawMaterialSchema, type RawMaterialFormValues } from "@/schemas/raw-material";
 import { updateRawMaterial } from "@/store/features/rawMaterialsSlice";
 import { useAppDispatch } from "@/store/hooks";
@@ -28,11 +27,11 @@ import { Input } from "../ui/input";
 
 interface RawMaterialEditDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
   material: RawMaterial | null;
 }
 
-export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterialEditDialogProps) {
+export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMaterialEditDialogProps) {
   const dispatch = useAppDispatch();
 
   const form = useForm<RawMaterialFormValues>({
@@ -65,30 +64,26 @@ export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterial
       })).unwrap();
       
       toast.success("Raw material updated successfully!");
-      onClose();
-    } catch (error) {
-      if (error instanceof ApiError && error.problemDetail) {
-        toast.error(error.problemDetail.title || "Validation Error", {
-          description: error.problemDetail.detail,
-        });
-        error.problemDetail.errors?.forEach((err) => {
-          form.setError(err.field as any, { type: "server", message: err.message });
-          toast.error(`Field '${err.field}': ${err.message}`);
+      onOpenChange(false);
+    } catch (error: any) {
+      if (error && error.status === 400 && error.problemDetail) {
+      
+      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
+        const fieldName = err.field.split('.').pop() as any;
+
+        form.setError(fieldName, { 
+          type: "server", 
+          message: err.message 
+          });
         });
       } else {
         toast.error("Failed to update raw material");
       }
-      console.error("Failed to update raw material:", error);
     }
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>Edit Raw Material</DialogTitle>
@@ -137,7 +132,7 @@ export function RawMaterialEditDialog({ isOpen, onClose, material }: RawMaterial
 
             <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-6">
               <DialogClose asChild>
-                <Button type="button" className="w-full sm:w-auto" onClick={handleClose}>Cancel</Button>
+                <Button className="w-full sm:w-auto">Cancel</Button>
               </DialogClose>
               <div className="flex-1 hidden sm:block" />
               <Button 

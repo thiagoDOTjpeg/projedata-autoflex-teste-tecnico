@@ -21,38 +21,81 @@ export const fetchProducts = createAsyncThunk(
 
 export const updateProductMaterials = createAsyncThunk(
   'products/updateProductMaterials',
-  async ({ productId, payload }: { productId: string, payload: ProductMaterialUpdate }) => {
-    const materials = await productsService.updateProductMaterials(productId, payload);
-    return { productId, materials };
+  async ({ productId, payload }: { productId: string, payload: ProductMaterialUpdate }, { rejectWithValue }) => {
+    try {
+      const materials = await productsService.updateProductMaterials(productId, payload);
+      return { productId, materials };
+    } catch (error: any) {
+      return rejectWithValue({
+        status: error.status,
+        message: error.message,
+        problemDetail: error.problemDetail
+      });
+    }
   }
 );
 
 export const updateProduct = createAsyncThunk(
   'products/updateProduct',
-  async ({ productId, payload }: { productId: string, payload: ProductUpdate }) => {
-    const product = await productsService.updateProduct(productId, payload);
-    return { productId, product };
+  async ({ productId, payload }: { productId: string, payload: ProductUpdate }, { rejectWithValue }) => {
+    try {
+      const product = await productsService.updateProduct(productId, payload);
+      return { productId, product };
+    } catch (error: any) {
+      return rejectWithValue({
+        status: error.status,
+        message: error.message,
+        problemDetail: error.problemDetail
+      });
+    }
   }
 );
 
 export const createProduct = createAsyncThunk(
   'products/createProduct',
-  async (payload: ProductRequest) => await productsService.createProduct(payload)
+  async (payload: ProductRequest, { rejectWithValue }) => {
+    try {
+      const product = await productsService.createProduct(payload);
+      return product;
+    } catch (error: any) {
+      return rejectWithValue({
+        status: error.status,
+        message: error.message,
+        problemDetail: error.problemDetail
+      });
+    }
+  }
 );
 
 export const deleteProductMaterials = createAsyncThunk(
   'products/deleteProductMaterials',
-  async ({ productId, materialId }: { productId: string, materialId: string }) => {
-    await productsService.deleteProductMaterial(productId, materialId);
-    return { productId, materialId };
+  async ({ productId, materialId }: { productId: string, materialId: string }, { rejectWithValue }) => {
+    try {
+      await productsService.deleteProductMaterial(productId, materialId);
+      return { productId, materialId };
+    } catch (error: any) {
+      return rejectWithValue({
+        status: error.status,
+        message: error.message,
+        problemDetail: error.problemDetail
+      });
+    }
   }
 );
 
 export const deleteProduct = createAsyncThunk(
   'products/deleteProduct',
-  async (productId: string) => {
-    await productsService.deleteProduct(productId);
-    return productId;
+  async (productId: string, { rejectWithValue }) => {
+    try {
+      await productsService.deleteProduct(productId);
+      return productId;
+    } catch (error: any) {
+      return rejectWithValue({
+        status: error.status,
+        message: error.message,
+        problemDetail: error.problemDetail
+      });
+    }
   }
 );
 
@@ -114,7 +157,13 @@ export const productsSlice = createSlice({
         isRejected(fetchProducts, updateProductMaterials, updateProduct, createProduct, deleteProductMaterials, deleteProduct),
         (state, action) => {
           state.loading = false;
-          state.error = action.error.message || 'Operation failed';
+          const errorPayload = action.payload as any;
+
+          if (errorPayload?.status === 400) {
+            state.error = null;
+          } else {
+            state.error = errorPayload?.message || "Critical system error";
+          }
         }
       );
   },

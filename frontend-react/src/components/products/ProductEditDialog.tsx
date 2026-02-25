@@ -82,11 +82,6 @@ export function ProductEditDialog({
 
   if (!product) return null;
 
-  const handleClose = () => {
-    form.reset();
-    onOpenChange(false);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
@@ -136,7 +131,7 @@ export function ProductEditDialog({
           
         <DialogFooter className="flex sm:flex-row flex-col gap-2 sm:gap-4 border-t pt-4 mt-4">
           <DialogClose asChild>
-            <Button className="w-full sm:w-auto" onClick={handleClose}>Cancel</Button>
+            <Button className="w-full sm:w-auto">Cancel</Button>
           </DialogClose>
           <div className="flex-1 hidden sm:block" />
           <Button 

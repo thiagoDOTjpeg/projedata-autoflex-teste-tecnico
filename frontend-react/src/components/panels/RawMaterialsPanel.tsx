@@ -81,7 +81,7 @@ export function RawMaterialsPanel() {
                     <Button size="icon" onClick={() => handleEditClick(rm)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" className="hover:text-red-600" onClick={() => handleDeleteClick(rm)}>
+                    <Button size="icon" className="hover:text-red-600" onClick={() => handleDeleteClick(rm)} aria-label="Delete">
                       <Trash2 className="h-4 w-4 transition-colors duration-200" />
                     </Button>
                   </div>

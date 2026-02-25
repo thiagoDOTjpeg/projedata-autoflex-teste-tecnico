@@ -311,7 +311,7 @@ public class RawMaterialServiceTest {
 
   @Test
   @TestTransaction
-  void shouldThrowNotFoundExceptionWhenDeletingNonExistentMaterial() {
+  void shouldNotThrowNotFoundExceptionWhenDeletingNonExistentMaterial() {
     Long nonExistentId = 9999L;
 
     assertDoesNotThrow(() -> {

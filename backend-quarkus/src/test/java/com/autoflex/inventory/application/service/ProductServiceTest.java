@@ -148,7 +148,7 @@ public class ProductServiceTest {
 
   @Test
   @TestTransaction
-  void shouldThrowNotFoundExceptionWhenDeleteProductWithNonExistentId() {
+  void shouldNotThrowNotFoundExceptionWhenDeleteProductWithNonExistentId() {
     Long nonExistentId = 9999L;
 
     assertDoesNotThrow(() -> {

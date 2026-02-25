@@ -7,6 +7,8 @@ import com.autoflex.inventory.presentation.dto.MaterialAmountDTO;
 import com.autoflex.inventory.presentation.dto.ProductRequestDTO;
 import com.autoflex.inventory.presentation.dto.ProductUpdateDTO;
 import com.autoflex.inventory.presentation.dto.ProductionSuggestionDTO;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
@@ -110,10 +112,7 @@ public class ProductService {
 
   @Transactional
   public void deleteProductById(Long id) {
-    Product product = Product.findById(id);
-    if (product == null) {
-      throw new NotFoundException("Product not found");
-    }
-    product.delete();
+    Product.findByIdOptional(id)
+            .ifPresentOrElse(PanacheEntityBase::delete, () -> Log.warn("WARNING: Attempted to delete non-existent product with id " + id));
   }
 }

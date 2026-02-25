@@ -2,6 +2,8 @@ package com.autoflex.inventory.application.service;
 
 import com.autoflex.inventory.domain.RawMaterial;
 import com.autoflex.inventory.presentation.dto.RawMaterialRequestDTO;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
@@ -48,11 +50,8 @@ public class RawMaterialService {
 
   @Transactional
   public void deleteRawMaterialById(Long id) {
-    RawMaterial material = getRawMaterialById(id);
-    if(material == null) {
-      throw new NotFoundException("Raw material not found");
-    }
-    material.delete();
+    RawMaterial.findByIdOptional(id)
+            .ifPresentOrElse(PanacheEntityBase::delete, () -> Log.warn("WARNING: Attempted to delete non-existent raw material with id " + id));
   }
 
 }

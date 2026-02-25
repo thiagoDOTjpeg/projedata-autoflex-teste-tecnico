@@ -17,8 +17,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      networks:
-        - inventory-network
+    networks:
+      - inventory-network
     volumes:
       - oracle_data:/opt/oracle/oradata
 

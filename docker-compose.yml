@@ -9,14 +9,11 @@ services:
       - APP_USER=inventory_user
       - APP_USER_PASSWORD=inventory_pwd
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "exit | sqlplus -L -S / AS SYSDBA @?/rdbms/admin/sqlsess.sql",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
+      test: ["CMD-SHELL", "exit | sqlplus -L -S / AS SYSDBA @?/rdbms/admin/sqlsess.sql"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s 
     networks:
       - inventory-network
     volumes:
@@ -24,16 +21,19 @@ services:
 
   backend:
     build: ./backend-quarkus
+    container_name: autoflex-backend
+    restart: on-failure 
     ports:
       - "8081:8081"
     environment:
-      - QUARKUS_HTTP_CORS_ORIGINS=http://localhost
+      - QUARKUS_HTTP_CORS_ORIGINS=http://athens.gritti.dev.br,http://localhost,http://127.0.0.1
       - QUARKUS_DATASOURCE_JDBC_URL=jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
       - QUARKUS_DATASOURCE_USERNAME=inventory_user
       - QUARKUS_DATASOURCE_PASSWORD=inventory_pwd
       - QUARKUS_HTTP_HOST=0.0.0.0
     depends_on:
-      - oracle-db
+      oracle-db:
+        condition: service_healthy
     networks:
       - inventory-network
 
@@ -42,7 +42,7 @@ services:
     ports:
       - "80:80"
     environment:
-      - VITE_API_URL=http://backend/api
+      - VITE_API_URL=http://athens.gritti.dev.br:8081/api
     depends_on:
       - backend
       - oracle-db

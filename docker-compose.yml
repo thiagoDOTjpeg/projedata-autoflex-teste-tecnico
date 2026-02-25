@@ -1,6 +1,6 @@
 services:
   oracle-db:
-    image: gvenzl/oracle-free:latest 
+    image: gvenzl/oracle-free:latest
     container_name: autoflex-oracle-db
     ports:
       - "1521:1521"
@@ -9,12 +9,47 @@ services:
       - APP_USER=inventory_user
       - APP_USER_PASSWORD=inventory_pwd
     healthcheck:
-      test: ["CMD-SHELL", "exit | sqlplus -L -S / AS SYSDBA @?/rdbms/admin/sqlsess.sql"]
+      test:
+        [
+          "CMD-SHELL",
+          "exit | sqlplus -L -S / AS SYSDBA @?/rdbms/admin/sqlsess.sql",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
+      networks:
+        - inventory-network
     volumes:
       - oracle_data:/opt/oracle/oradata
 
+  backend:
+    build: ./backend-quarkus
+    ports:
+      - "8081:8081"
+    environment:
+      - QUARKUS_HTTP_CORS_ORIGINS=http://localhost
+      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
+      - QUARKUS_DATASOURCE_USERNAME=inventory_user
+      - QUARKUS_DATASOURCE_PASSWORD=inventory_pwd
+      - QUARKUS_HTTP_HOST=0.0.0.0
+    depends_on:
+      - oracle-db
+    networks:
+      - inventory-network
+
+  frontend:
+    build: ./frontend-react
+    ports:
+      - "80:80"
+    environment:
+      - VITE_API_URL=http://backend/api
+    depends_on:
+      - backend
+      - oracle-db
+    networks:
+      - inventory-network
 volumes:
   oracle_data:
+networks:
+  inventory-network:
+    driver: bridge

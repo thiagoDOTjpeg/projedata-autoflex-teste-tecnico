@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-@Path("/production")
+@Path("/api/production")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProductionResource {
 

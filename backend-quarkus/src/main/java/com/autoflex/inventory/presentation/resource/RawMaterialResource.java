@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.List;
 
-@Path("/raw-materials")
+@Path("/api/raw-materials")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class RawMaterialResource {
@@ -35,7 +35,7 @@ public class RawMaterialResource {
   @Path("/{id}")
   public Response update(Long id, @Valid RawMaterialRequestDTO dto) {
     RawMaterial material = rawMaterialService.updateRawMaterial(id, dto);
-    return Response.status(Response.Status.CREATED).entity(material).build();
+    return Response.status(Response.Status.OK).entity(material).build();
   }
 
   @GET

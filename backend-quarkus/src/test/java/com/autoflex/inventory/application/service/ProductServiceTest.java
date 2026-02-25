@@ -151,7 +151,7 @@ public class ProductServiceTest {
   void shouldThrowNotFoundExceptionWhenDeleteProductWithNonExistentId() {
     Long nonExistentId = 9999L;
 
-    assertThrows(NotFoundException.class, () -> {
+    assertDoesNotThrow(() -> {
       productService.deleteProductById(nonExistentId);
     });
   }

@@ -1,62 +1,119 @@
-# code-with-quarkus
+docker-compose up --build
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+# Industrial Inventory System - Projedata Technical Test
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+![Quarkus](<https://img.shields.io/badge/Backend-Quarkus%20(Java%2021)-blue>)
+![React](https://img.shields.io/badge/Frontend-React%2019-brightgreen)
+![Oracle](https://img.shields.io/badge/Database-Oracle-orange)
+![Docker Compose](https://img.shields.io/badge/Deploy-Docker%20Compose-yellow)
 
-## Running the application in dev mode
+> Plataforma de gestão de inventário industrial, focada em consistência de dados e experiência do usuário. Demonstra padrões modernos de arquitetura, resiliência e testes.
 
-You can run your application in dev mode that enables live coding using:
+---
 
-```shell script
+## 🚀 Quick Start
+
+### 1. Docker Compose (Recomendado)
+
+Orquestra Oracle, Backend e Frontend. Basta rodar:
+
+```bash
+docker-compose up --build
+```
+
+- Frontend: [http://localhost](http://localhost)
+- Backend API: [http://localhost:8081](http://localhost:8081)
+- Swagger UI: [http://localhost:8081/swagger](http://localhost:8081/swagger)
+
+### 2. Execução Manual (Desenvolvimento)
+
+**Backend** (Java 21):
+
+```bash
+cd backend-quarkus
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+**Frontend** (Node.js 20+):
 
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./mvnw package
+```bash
+cd frontend-react
+npm install
+npm run dev
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+---
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+## 🧪 Testes
 
-If you want to build an _über-jar_, execute the following command:
+### Backend
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+Usa H2 Database em memória para isolamento e velocidade. Testes unitários e integração:
+
+```bash
+cd backend-quarkus
+./mvnw test
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+### Frontend
 
-## Creating a native executable
+- **Unitários (Vitest):**
 
-You can create a native executable using:
+  ```bash
+  npm run test
+  ```
 
-```shell script
-./mvnw package -Dnative
-```
+- **E2E (Cypress):**
+  ```bash
+  npx cypress:open # ou npm run cypress:run para headless
+  ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+---
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
+## 🧠 Decisões de Arquitetura
 
-You can then execute your native executable with: `./target/code-with-quarkus-1.0.0-SNAPSHOT-runner`
+1. **createAsyncThunk** vs **RTK Query**
+   - _Decisão:_ createAsyncThunk.
+   - _Justificativa:_ Controle granular do estado global (Redux) e sincronização de erros globais (RFC 7807).
+2. **Active Record (Panache)** vs **Repository Pattern**
+   - _Decisão:_ PanacheEntity (Active Record).
+   - _Justificativa:_ Reduz boilerplate de CRUD, foca a complexidade nos Services.
+3. **H2 para Testes no Backend**
+   - _Decisão:_ H2 Database em @QuarkusTest.
+   - _Justificativa:_ Velocidade e determinismo, sem dependência de Oracle real para testes.
+4. **Gestão de Erros RFC 7807**
+   - Handler global para garantir application/problem+json, facilitando mapeamento automático de erros no frontend.
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+---
 
-## Provided Code
+## ⚠️ Troubleshooting
 
-### REST
+- **ORA-12514 no Backend:** Oracle demora a registrar o serviço no Listener. O backend está com restart: on-failure no Docker. Se falhar, aguarde 10 segundos.
+- **CORS Error:** Acesse via localhost. Se usar IP, o browser pode bloquear. Garanta que o Origin está mapeado em application.properties.
+- **Porta 8081 ocupada:** Verifique se não há outro serviço Java ou Quarkus rodando fora do Docker.
 
-Easily start your REST Web Services
+---
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+## 🛠️ Melhorias Futuras
+
+- Migração para RTK Query (frontend)
+- Soft Deletes (archived_at em vez de cascade delete)
+- Caching com Redis para sugestões de produção
+- Autenticação JWT e RBAC
+
+---
+
+## 📁 Estrutura do Projeto
+
+- **backend-quarkus/**: API Quarkus, lógica de negócio, persistência
+- **frontend-react/**: SPA React, UI, integração com API
+- **docker-compose.yml**: Orquestração de containers
+
+---
+
+## 📞 Contato
+
+Thiago Gritti
+Email: thiagogritti@gmail.com
+LinkedIn: [linkedin.com/in/thiagogritti](https://linkedin.com/in/thiagogritti)
+Portifólio: [gritti.dev.br](https://gritti.dev.br)

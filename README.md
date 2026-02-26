@@ -34,6 +34,7 @@ cd backend-quarkus
 
 ```bash
 cd frontend-react
+cp .env.example .env
 npm install
 npm run dev
 ```

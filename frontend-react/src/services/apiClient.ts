@@ -27,7 +27,7 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async post<T>(endpoint: string, body?: any): Promise<T> {
+  async post<T>(endpoint: string, body?: object): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,7 +36,7 @@ export const apiClient = {
     return handleResponse<T>(response);
   },
 
-  async put<T>(endpoint: string, body?: any): Promise<T> {
+  async put<T>(endpoint: string, body?: object): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

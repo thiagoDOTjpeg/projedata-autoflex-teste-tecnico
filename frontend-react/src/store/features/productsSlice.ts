@@ -1,3 +1,5 @@
+import { ApiError } from '@/lib/api-errors';
+import type { ApiErrorPayload } from '@/types/api';
 import { createAsyncThunk, createSlice, isPending, isRejected } from '@reduxjs/toolkit';
 import { productsService } from '../../services/productsService';
 import type { Product, ProductMaterialUpdate, ProductRequest, ProductUpdate } from '../../types/product';
@@ -25,12 +27,15 @@ export const updateProductMaterials = createAsyncThunk(
     try {
       const materials = await productsService.updateProductMaterials(productId, payload);
       return { productId, materials };
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -41,12 +46,15 @@ export const updateProduct = createAsyncThunk(
     try {
       const product = await productsService.updateProduct(productId, payload);
       return { productId, product };
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -57,12 +65,15 @@ export const createProduct = createAsyncThunk(
     try {
       const product = await productsService.createProduct(payload);
       return product;
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -73,12 +84,15 @@ export const deleteProductMaterials = createAsyncThunk(
     try {
       await productsService.deleteProductMaterial(productId, materialId);
       return { productId, materialId };
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -89,12 +103,15 @@ export const deleteProduct = createAsyncThunk(
     try {
       await productsService.deleteProduct(productId);
       return productId;
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -157,7 +174,7 @@ export const productsSlice = createSlice({
         isRejected(fetchProducts, updateProductMaterials, updateProduct, createProduct, deleteProductMaterials, deleteProduct),
         (state, action) => {
           state.loading = false;
-          const errorPayload = action.payload as any;
+          const errorPayload = action.payload as ApiErrorPayload | undefined;
 
           if (errorPayload?.status === 400) {
             state.error = null;

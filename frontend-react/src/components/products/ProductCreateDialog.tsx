@@ -25,7 +25,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { productCreateSchema as formSchema, type ProductCreateFormValues as FormValues } from "@/schemas/product";
+import {
+  productCreateSchema as formSchema,
+  type ProductCreateFormValues as FormValues,
+} from "@/schemas/product";
 import { createProduct } from "@/store/features/productsSlice";
 import { fetchRawMaterials } from "@/store/features/rawMaterialsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -33,7 +36,7 @@ import type { ProductRequest } from "@/types/product";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 interface ProductCreateDialogProps {
@@ -47,7 +50,7 @@ export function ProductCreateDialog({
 }: ProductCreateDialogProps) {
   const dispatch = useAppDispatch();
   const { rawMaterials } = useAppSelector((state) => state.rawMaterials);
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,9 +60,13 @@ export function ProductCreateDialog({
     },
   });
 
-  const { materials } = form.watch();
+  const materials = useWatch({
+    control: form.control,
+    name: "materials",
+  });
 
-  const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] = useState("");
+  const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] =
+    useState("");
   const [selectedQuantity, setSelectedQuantity] = useState("");
 
   useEffect(() => {
@@ -77,20 +84,27 @@ export function ProductCreateDialog({
   const handleAddMaterial = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!selectedRawMaterialSelect || !selectedQuantity) return;
-    
-    const material = rawMaterials.find((m) => String(m.id) === String(selectedRawMaterialSelect));
+
+    const material = rawMaterials.find(
+      (m) => String(m.id) === String(selectedRawMaterialSelect),
+    );
     if (!material) return;
 
-    if (materials.some((m) => String(m.materialId) === String(material.id))) return;
+    if (materials.some((m) => String(m.materialId) === String(material.id)))
+      return;
 
-    form.setValue("materials", [
-      ...materials,
-      {
-        materialId: String(material.id),
-        name: material.name,
-        quantity: Number(selectedQuantity),
-      },
-    ], { shouldValidate: true });
+    form.setValue(
+      "materials",
+      [
+        ...materials,
+        {
+          materialId: String(material.id),
+          name: material.name,
+          quantity: Number(selectedQuantity),
+        },
+      ],
+      { shouldValidate: true },
+    );
     setSelectedRawMaterialSelect("");
     setSelectedQuantity("");
   };
@@ -99,7 +113,7 @@ export function ProductCreateDialog({
     form.setValue(
       "materials",
       materials.filter((m) => String(m.materialId) !== String(materialId)),
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
   };
 
@@ -118,29 +132,48 @@ export function ProductCreateDialog({
       onOpenChange(false);
       resetDialog();
       toast.success("Product created successfully!");
-    } catch (error: any) {
-     if (error && error.status === 400 && error.problemDetail) {
-      
-      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
-        const fieldName = err.field.split('.').pop() as any;
-
-        form.setError(fieldName, { 
-          type: "server", 
-          message: err.message 
-        });
-      });
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "status" in error &&
+        (error as { status: number }).status === 400 &&
+        "problemDetail" in error
+      ) {
+        const problemDetail = (
+          error as {
+            problemDetail: {
+              errors?: Array<{ field: string; message: string }>;
+            };
+          }
+        ).problemDetail;
+        problemDetail.errors?.forEach(
+          (err: { field: string; message: string }) => {
+            const fieldName = err.field.split(".").pop() as keyof FormValues;
+            form.setError(fieldName, {
+              type: "server",
+              message: err.message,
+            });
+          },
+        );
       } else {
-        toast.error("Failed to create product");
+        toast.error("Failed to create product.");
       }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={(val) => {
-      onOpenChange(val);
-      if (!val) resetDialog();
-    }}>
-      <DialogContent className="max-h-[85vh] w-[95vw] max-w-[650px] flex flex-col" showCloseButton={false}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        onOpenChange(val);
+        if (!val) resetDialog();
+      }}
+    >
+      <DialogContent
+        className="max-h-[85vh] w-[95vw] max-w-162.5 flex flex-col"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-800">
             Create New Product
@@ -148,7 +181,10 @@ export function ProductCreateDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6 flex flex-col">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6 flex flex-col"
+          >
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -177,7 +213,11 @@ export function ProductCreateDialog({
                         placeholder="0.00"
                         {...field}
                         value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : 0,
+                          )
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -192,10 +232,12 @@ export function ProductCreateDialog({
               render={() => (
                 <FormItem className="space-y-4">
                   <div>
-                    <h3 className="font-semibold text-slate-800">Raw Materials</h3>
+                    <h3 className="font-semibold text-slate-800">
+                      Raw Materials
+                    </h3>
                     <FormMessage />
                   </div>
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
                     <div className="flex-1 space-y-2 w-full">
                       <Label htmlFor="material">Select Material</Label>
@@ -203,14 +245,21 @@ export function ProductCreateDialog({
                         id="material"
                         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         value={selectedRawMaterialSelect}
-                        onChange={(e) => setSelectedRawMaterialSelect(e.target.value)}
+                        onChange={(e) =>
+                          setSelectedRawMaterialSelect(e.target.value)
+                        }
                       >
-                        <option value="" disabled>Choose a material...</option>
+                        <option value="" disabled>
+                          Choose a material...
+                        </option>
                         {rawMaterials.map((material) => (
                           <option
                             key={material.id}
                             value={material.id}
-                            disabled={materials.some((m) => String(m.materialId) === String(material.id))}
+                            disabled={materials.some(
+                              (m) =>
+                                String(m.materialId) === String(material.id),
+                            )}
                           >
                             {material.name} (Stock: {material.stockQuantity})
                           </option>
@@ -229,9 +278,13 @@ export function ProductCreateDialog({
                         placeholder="0"
                       />
                     </div>
-                    <Button 
+                    <Button
                       onClick={handleAddMaterial}
-                      disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
+                      disabled={
+                        !selectedRawMaterialSelect ||
+                        !selectedQuantity ||
+                        Number(selectedQuantity) <= 0
+                      }
                       className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
                       type="button"
                     >
@@ -243,22 +296,34 @@ export function ProductCreateDialog({
                     <TableHeader>
                       <TableRow className="bg-slate-50">
                         <TableHead className="font-bold">Material</TableHead>
-                        <TableHead className="text-right font-bold">Quantity Required</TableHead>
-                        <TableHead className="text-right font-bold w-20">Action</TableHead>
+                        <TableHead className="text-right font-bold">
+                          Quantity Required
+                        </TableHead>
+                        <TableHead className="text-right font-bold w-20">
+                          Action
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {materials.length > 0 ? (
                         materials.map((material) => (
-                          <TableRow key={material.materialId} className="hover:bg-slate-50/50">
-                            <TableCell className="font-medium">{material.name}</TableCell>
-                            <TableCell className="text-right font-mono">{material.quantity}</TableCell>
+                          <TableRow
+                            key={material.materialId}
+                            className="hover:bg-slate-50/50"
+                          >
+                            <TableCell className="font-medium">
+                              {material.name}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {material.quantity}
+                            </TableCell>
                             <TableCell className="text-right">
                               <Button
                                 size="icon"
-                              
                                 className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                onClick={() => handleRemoveMaterial(material.materialId)}
+                                onClick={() =>
+                                  handleRemoveMaterial(material.materialId)
+                                }
                                 type="button"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -281,10 +346,12 @@ export function ProductCreateDialog({
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter className="flex flex-row gap-4 border-t pt-4 mt-auto">
               <DialogClose asChild>
-                <Button type="button" onClick={() => resetDialog()}>Cancel</Button>
+                <Button type="button" onClick={() => resetDialog()}>
+                  Cancel
+                </Button>
               </DialogClose>
               <div className="flex-1" />
               <Button

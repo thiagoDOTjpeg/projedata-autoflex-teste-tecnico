@@ -17,7 +17,7 @@ export function Dashboard() {
 
     const intervalId = setInterval(() => {
       dispatch(checkSystemHealth());
-    }, 30000); 
+    }, 30000);
 
     return () => clearInterval(intervalId);
   }, [dispatch]);
@@ -79,7 +79,12 @@ export function Dashboard() {
           {isHealthy ? (
             <span className="font-medium text-emerald-400">Online</span>
           ) : (
-            <span className="font-medium text-red-500 hover:underline cursor-help" title="Could not reach /health endpoint">Offline</span>
+            <span
+              className="font-medium text-red-500 hover:underline cursor-help"
+              title="Could not reach /health endpoint"
+            >
+              Offline
+            </span>
           )}
         </div>
         <div className="flex items-center gap-1">

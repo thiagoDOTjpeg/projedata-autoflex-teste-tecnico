@@ -13,7 +13,9 @@ import { useEffect } from "react";
 
 export function ProductionPanel() {
   const dispatch = useAppDispatch();
-  const { suggestions, loading, error } = useAppSelector((state) => state.production);
+  const { suggestions, loading, error } = useAppSelector(
+    (state) => state.production,
+  );
 
   useEffect(() => {
     dispatch(fetchProductionSuggestions());
@@ -34,30 +36,37 @@ export function ProductionPanel() {
   return (
     <div className="space-y-4">
       <div className="rounded-md border bg-white shadow-sm overflow-x-auto scrollbar-hide">
-        <Table className="min-w-[500px]">
+        <Table className="min-w-125">
           <TableHeader>
             <TableRow>
               <TableHead>Product</TableHead>
-              <TableHead className="text-right">Max Production Quantity</TableHead>
-              <TableHead className="text-right">Total Value</TableHead> 
+              <TableHead className="text-right">
+                Max Production Quantity
+              </TableHead>
+              <TableHead className="text-right">Total Value</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {suggestions.length > 0 ? (
               suggestions.map((suggestion, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-medium">{suggestion.productName}</TableCell>
+                  <TableCell className="font-medium">
+                    {suggestion.productName}
+                  </TableCell>
                   <TableCell className="text-right font-mono font-bold text-emerald-600">
                     {suggestion.quantityToProduce}
                   </TableCell>
                   <TableCell className="text-right font-mono font-bold text-emerald-600">
                     {suggestion.totalValue}
                   </TableCell>
-                </TableRow> 
+                </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={2} className="h-24 text-center text-slate-500">
+                <TableCell
+                  colSpan={2}
+                  className="h-24 text-center text-slate-500"
+                >
                   No production suggestions available.
                 </TableCell>
               </TableRow>

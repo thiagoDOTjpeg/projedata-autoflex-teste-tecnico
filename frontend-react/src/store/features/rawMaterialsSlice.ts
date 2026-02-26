@@ -1,3 +1,5 @@
+import { ApiError } from "@/lib/api-errors";
+import type { ApiErrorPayload } from "@/types/api";
 import type { RawMaterial, RawMaterialRequest } from "@/types/product";
 import { createAsyncThunk, createSlice, isPending, isRejected } from "@reduxjs/toolkit";
 import { rawMaterialsService } from "../../services/rawMaterialsService";
@@ -25,12 +27,15 @@ export const createRawMaterial = createAsyncThunk(
     try {
       const response = await rawMaterialsService.createRawMaterial(payload)
       return response
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -41,12 +46,15 @@ export const updateRawMaterial = createAsyncThunk(
     try {
       const response = await rawMaterialsService.updateRawMaterial(material)
       return response
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -57,12 +65,15 @@ export const deleteRawMaterial = createAsyncThunk(
     try {
       await rawMaterialsService.deleteRawMaterial(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue({
-        status: error.status,
-        message: error.message,
-        problemDetail: error.problemDetail
-      });
+    } catch (error: unknown) {
+      if (error instanceof ApiError) {
+        return rejectWithValue({
+          status: error.status,
+          message: error.message,
+          problemDetail: error.problemDetail
+        });
+      }
+      return rejectWithValue({ message: error instanceof Error ? error.message : "Critical system error" })
     }
   }
 );
@@ -103,7 +114,7 @@ export const rawMaterialsSlice = createSlice({
         isRejected(fetchRawMaterials, updateRawMaterial, createRawMaterial, deleteRawMaterial),
         (state, action) => {
           state.loading = false;
-          const errorPayload = action.payload as any;
+          const errorPayload = action.payload as ApiErrorPayload | undefined;
 
           if (errorPayload?.status === 400) {
             state.error = null;

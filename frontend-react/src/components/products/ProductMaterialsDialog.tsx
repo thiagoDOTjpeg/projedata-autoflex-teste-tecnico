@@ -6,12 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormField,
-  FormItem,
-  FormMessage
-} from "@/components/ui/form";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import {
   Table,
   TableBody,
@@ -21,14 +16,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ApiError } from "@/lib/api-errors";
-import { productMaterialsUpdateSchema as formSchema, type ProductMaterialsUpdateFormValues as FormValues } from "@/schemas/product";
-import { deleteProductMaterials, fetchProducts, updateProductMaterials } from "@/store/features/productsSlice";
+import {
+  productMaterialsUpdateSchema as formSchema,
+  type ProductMaterialsUpdateFormValues as FormValues,
+} from "@/schemas/product";
+import {
+  deleteProductMaterials,
+  fetchProducts,
+  updateProductMaterials,
+} from "@/store/features/productsSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import type { Product } from "@/types/product";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -48,15 +50,19 @@ export function ProductMaterialsDialog({
   const dispatch = useAppDispatch();
   const { rawMaterials } = useAppSelector((state) => state.rawMaterials);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] = useState("");
+  const [selectedRawMaterialSelect, setSelectedRawMaterialSelect] =
+    useState("");
   const [selectedQuantity, setSelectedQuantity] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { materials: [] }
+    defaultValues: { materials: [] },
   });
 
-  const { materials } = form.watch();
+  const materials = useWatch({
+    control: form.control,
+    name: "materials",
+  });
 
   useEffect(() => {
     if (open && !isEditing) {
@@ -100,9 +106,9 @@ export function ProductMaterialsDialog({
     form.setValue(
       "materials",
       materials.map((m) =>
-        m.materialId === materialId ? { ...m, quantity } : m
+        m.materialId === materialId ? { ...m, quantity } : m,
       ),
-      { shouldValidate: true }
+      { shouldValidate: true },
     );
   };
 
@@ -116,22 +122,24 @@ export function ProductMaterialsDialog({
       form.setValue(
         "materials",
         materials.filter((m) => m.materialId !== materialId),
-        { shouldValidate: true }
+        { shouldValidate: true },
       );
     } else {
       try {
-        await dispatch(deleteProductMaterials({ productId: product.id, materialId })).unwrap();
+        await dispatch(
+          deleteProductMaterials({ productId: product.id, materialId }),
+        ).unwrap();
         await dispatch(fetchProducts());
         toast.success("Material removed successfully");
         form.setValue(
           "materials",
           materials.filter((m) => m.materialId !== materialId),
-          { shouldValidate: true }
+          { shouldValidate: true },
         );
       } catch (error) {
         if (error instanceof ApiError && error.problemDetail) {
           toast.error(error.problemDetail.title || "Validation Error", {
-            description: error.problemDetail.detail
+            description: error.problemDetail.detail,
           });
         } else {
           toast.error("Failed to delete product material");
@@ -142,22 +150,34 @@ export function ProductMaterialsDialog({
   };
 
   const handleAddMaterial = () => {
-    if (!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0) return;
+    if (
+      !selectedRawMaterialSelect ||
+      !selectedQuantity ||
+      Number(selectedQuantity) <= 0
+    )
+      return;
 
-    const rawMaterial = rawMaterials.find(rm => String(rm.id) === selectedRawMaterialSelect);
+    const rawMaterial = rawMaterials.find(
+      (rm) => String(rm.id) === selectedRawMaterialSelect,
+    );
     if (!rawMaterial) return;
 
-    if (materials.some(m => String(m.materialId) === String(rawMaterial.id))) return;
+    if (materials.some((m) => String(m.materialId) === String(rawMaterial.id)))
+      return;
 
-    form.setValue("materials", [
-      ...materials,
-      {
-        materialId: String(rawMaterial.id),
-        name: rawMaterial.name,
-        quantity: Number(selectedQuantity),
-      }
-    ], { shouldValidate: true });
-    
+    form.setValue(
+      "materials",
+      [
+        ...materials,
+        {
+          materialId: String(rawMaterial.id),
+          name: rawMaterial.name,
+          quantity: Number(selectedQuantity),
+        },
+      ],
+      { shouldValidate: true },
+    );
+
     setSelectedRawMaterialSelect("");
     setSelectedQuantity("");
   };
@@ -169,9 +189,11 @@ export function ProductMaterialsDialog({
         quantity: m.quantity,
       })),
     };
-    
+
     try {
-      await dispatch(updateProductMaterials({ productId: product.id, payload })).unwrap();
+      await dispatch(
+        updateProductMaterials({ productId: product.id, payload }),
+      ).unwrap();
       await dispatch(fetchProducts());
       setIsEditing(false);
       toast.success("Materials updated successfully!");
@@ -191,17 +213,20 @@ export function ProductMaterialsDialog({
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onOpenChange={(value) => { 
-        onOpenChange(value); 
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        onOpenChange(value);
         if (!value) {
           setIsEditing(false);
           form.reset();
         }
-      }} 
+      }}
     >
-      <DialogContent className="max-h-[85vh] w-[95vw] max-w-[650px] flex flex-col" showCloseButton={false}>
+      <DialogContent
+        className="max-h-[85vh] w-[95vw] max-w-162.5 flex flex-col"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-slate-800">
             Manufacturing Materials: {product.name}
@@ -209,17 +234,22 @@ export function ProductMaterialsDialog({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6 flex flex-col">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex-1 overflow-y-auto scrollbar-hide py-4 space-y-6 flex flex-col"
+          >
             <FormField
               control={form.control}
               name="materials"
               render={() => (
                 <FormItem className="space-y-4">
                   <FormMessage />
-                  
+
                   {isEditing && (
                     <div className="space-y-4">
-                      <h3 className="font-semibold text-slate-800">Add Raw Material</h3>
+                      <h3 className="font-semibold text-slate-800">
+                        Add Raw Material
+                      </h3>
                       <div className="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-4 p-4 rounded-md border bg-slate-50">
                         <div className="flex-1 space-y-2 w-full">
                           <Label htmlFor="material">Select Material</Label>
@@ -227,16 +257,25 @@ export function ProductMaterialsDialog({
                             id="material"
                             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             value={selectedRawMaterialSelect}
-                            onChange={(e) => setSelectedRawMaterialSelect(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedRawMaterialSelect(e.target.value)
+                            }
                           >
-                            <option value="" disabled>Choose a material...</option>
+                            <option value="" disabled>
+                              Choose a material...
+                            </option>
                             {rawMaterials.map((material) => (
                               <option
                                 key={material.id}
                                 value={material.id}
-                                disabled={materials.some((m) => String(m.materialId) === String(material.id))}
+                                disabled={materials.some(
+                                  (m) =>
+                                    String(m.materialId) ===
+                                    String(material.id),
+                                )}
                               >
-                                {material.name} (Stock: {material.stockQuantity})
+                                {material.name} (Stock: {material.stockQuantity}
+                                )
                               </option>
                             ))}
                           </select>
@@ -249,13 +288,19 @@ export function ProductMaterialsDialog({
                             min="1"
                             step="1"
                             value={selectedQuantity}
-                            onChange={(e) => setSelectedQuantity(e.target.value)}
+                            onChange={(e) =>
+                              setSelectedQuantity(e.target.value)
+                            }
                             placeholder="0"
                           />
                         </div>
-                        <Button 
+                        <Button
                           onClick={handleAddMaterial}
-                          disabled={!selectedRawMaterialSelect || !selectedQuantity || Number(selectedQuantity) <= 0}
+                          disabled={
+                            !selectedRawMaterialSelect ||
+                            !selectedQuantity ||
+                            Number(selectedQuantity) <= 0
+                          }
                           className="bg-slate-800 hover:bg-slate-900 text-white w-full sm:w-auto h-10 mt-2 sm:mt-0"
                           type="button"
                         >
@@ -264,20 +309,29 @@ export function ProductMaterialsDialog({
                       </div>
                     </div>
                   )}
-                  
+
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-slate-50">
                         <TableHead className="font-bold">Material</TableHead>
-                        <TableHead className="text-right font-bold">Quantity Required</TableHead>
-                        <TableHead className="text-right font-bold w-20">Actions</TableHead>
+                        <TableHead className="text-right font-bold">
+                          Quantity Required
+                        </TableHead>
+                        <TableHead className="text-right font-bold w-20">
+                          Actions
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {materials.length > 0 ? (
                         materials.map((material) => (
-                          <TableRow key={material.materialId} className="hover:bg-slate-50/50">
-                            <TableCell className="font-medium">{material.name}</TableCell>
+                          <TableRow
+                            key={material.materialId}
+                            className="hover:bg-slate-50/50"
+                          >
+                            <TableCell className="font-medium">
+                              {material.name}
+                            </TableCell>
                             <TableCell className="text-right">
                               {isEditing ? (
                                 <div className="flex justify-end">
@@ -287,19 +341,28 @@ export function ProductMaterialsDialog({
                                     step="1"
                                     className="w-24 text-right focus:ring-emerald-500"
                                     value={material.quantity}
-                                    onChange={(e) => handleQuantityChange(material.materialId, Number(e.target.value))}
+                                    onChange={(e) =>
+                                      handleQuantityChange(
+                                        material.materialId,
+                                        Number(e.target.value),
+                                      )
+                                    }
                                   />
                                 </div>
                               ) : (
-                                <span className="font-mono">{material.quantity}</span>
+                                <span className="font-mono">
+                                  {material.quantity}
+                                </span>
                               )}
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button 
+                              <Button
                                 type="button"
                                 size="icon"
                                 className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                onClick={() => handleDelete(material.materialId)}
+                                onClick={() =>
+                                  handleDelete(material.materialId)
+                                }
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -325,13 +388,17 @@ export function ProductMaterialsDialog({
             <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-auto">
               {isEditing ? (
                 <>
-                  <Button type="button" className="w-full sm:w-auto text-red-500 hover:bg-red-50" onClick={handleCancel}>
+                  <Button
+                    type="button"
+                    className="w-full sm:w-auto text-red-500 hover:bg-red-50"
+                    onClick={handleCancel}
+                  >
                     Cancel
                   </Button>
                   <div className="flex-1 hidden sm:block" />
-                  <Button 
+                  <Button
                     type="submit"
-                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white min-w-[100px]"
+                    className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white min-w-25"
                     disabled={form.formState.isSubmitting}
                   >
                     Confirm
@@ -340,10 +407,16 @@ export function ProductMaterialsDialog({
               ) : (
                 <>
                   <DialogClose asChild>
-                    <Button type="button" className="w-full sm:w-auto">Close</Button>
+                    <Button type="button" className="w-full sm:w-auto">
+                      Close
+                    </Button>
                   </DialogClose>
                   <div className="flex-1 hidden sm:block" />
-                  <Button type="button" className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white min-w-[100px]" onClick={handleEdit}>
+                  <Button
+                    type="button"
+                    className="w-full sm:w-auto bg-slate-800 hover:bg-slate-900 text-white min-w-25"
+                    onClick={handleEdit}
+                  >
                     Edit
                   </Button>
                 </>

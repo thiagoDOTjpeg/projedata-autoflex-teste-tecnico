@@ -19,14 +19,22 @@ import { ProductMaterialsDialog } from "../products/ProductMaterialsDialog";
 
 export function ProductsPanel() {
   const dispatch = useAppDispatch();
-  const { products, loading, error } = useAppSelector((state) => state.products);
-  const [selectedProductId, setSelectedProductId] = useState<string | number | null>(null);
-  const [isEditProductMaterialsDialogOpen, setIsEditProductMaterialsDialogOpen] = useState(false);
+  const { products, loading, error } = useAppSelector(
+    (state) => state.products,
+  );
+  const [selectedProductId, setSelectedProductId] = useState<
+    string | number | null
+  >(null);
+  const [
+    isEditProductMaterialsDialogOpen,
+    setIsEditProductMaterialsDialogOpen,
+  ] = useState(false);
   const [isEditDetailsOpen, setIsEditDetailsOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const selectedProduct = products.find((p) => p.id === selectedProductId) || null;
+  const selectedProduct =
+    products.find((p) => p.id === selectedProductId) || null;
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -54,7 +62,7 @@ export function ProductsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button 
+        <Button
           className="text-white bg-emerald-600 hover:bg-emerald-700"
           onClick={() => setIsCreateDialogOpen(true)}
         >
@@ -62,7 +70,7 @@ export function ProductsPanel() {
         </Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm overflow-x-auto scrollbar-hide">
-        <Table className="min-w-[600px]">
+        <Table className="min-w-150">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -95,9 +103,9 @@ export function ProductsPanel() {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button  
-                      size="icon" 
-                      className="hover:text-red-600" 
+                    <Button
+                      size="icon"
+                      className="hover:text-red-600"
                       onClick={() => {
                         setSelectedProductId(product.id);
                         setIsDeleteDialogOpen(true);
@@ -139,7 +147,9 @@ export function ProductsPanel() {
 function ProductsTableSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="flex justify-end"><Skeleton className="h-10 w-32" /></div>
+      <div className="flex justify-end">
+        <Skeleton className="h-10 w-32" />
+      </div>
       <div className="rounded-md border bg-white p-4">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="flex justify-between py-4 border-b">

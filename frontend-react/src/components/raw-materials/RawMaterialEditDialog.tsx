@@ -6,7 +6,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { rawMaterialSchema, type RawMaterialFormValues } from "@/schemas/raw-material";
+import {
+  rawMaterialSchema,
+  type RawMaterialFormValues,
+} from "@/schemas/raw-material";
 import { updateRawMaterial } from "@/store/features/rawMaterialsSlice";
 import { useAppDispatch } from "@/store/hooks";
 import type { RawMaterial } from "@/types/product";
@@ -31,7 +34,11 @@ interface RawMaterialEditDialogProps {
   material: RawMaterial | null;
 }
 
-export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMaterialEditDialogProps) {
+export function RawMaterialEditDialog({
+  isOpen,
+  onOpenChange,
+  material,
+}: RawMaterialEditDialogProps) {
   const dispatch = useAppDispatch();
 
   const form = useForm<RawMaterialFormValues>({
@@ -55,27 +62,44 @@ export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMat
 
   const handleSaveEdit = async (data: RawMaterialFormValues) => {
     if (!material) return;
-    
+
     try {
-      await dispatch(updateRawMaterial({
-        id: material.id,
-        name: data.name,
-        stockQuantity: data.stockQuantity,
-      })).unwrap();
-      
+      await dispatch(
+        updateRawMaterial({
+          id: material.id,
+          name: data.name,
+          stockQuantity: data.stockQuantity,
+        }),
+      ).unwrap();
+
       toast.success("Raw material updated successfully!");
       onOpenChange(false);
-    } catch (error: any) {
-      if (error && error.status === 400 && error.problemDetail) {
-      
-      error.problemDetail.errors?.forEach((err: { field: string, message: string }) => {
-        const fieldName = err.field.split('.').pop() as any;
-
-        form.setError(fieldName, { 
-          type: "server", 
-          message: err.message 
-          });
-        });
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "status" in error &&
+        (error as { status: number }).status === 400 &&
+        "problemDetail" in error
+      ) {
+        const problemDetail = (
+          error as {
+            problemDetail: {
+              errors?: Array<{ field: string; message: string }>;
+            };
+          }
+        ).problemDetail;
+        problemDetail.errors?.forEach(
+          (err: { field: string; message: string }) => {
+            const fieldName = err.field
+              .split(".")
+              .pop() as keyof RawMaterialFormValues;
+            form.setError(fieldName, {
+              type: "server",
+              message: err.message,
+            });
+          },
+        );
       } else {
         toast.error("Failed to update raw material");
       }
@@ -84,19 +108,27 @@ export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMat
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
+      <DialogContent
+        className="w-[95vw] sm:max-w-106.25"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle>Edit Raw Material</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSaveEdit)} className="space-y-4 py-4">
+          <form
+            onSubmit={form.handleSubmit(handleSaveEdit)}
+            className="space-y-4 py-4"
+          >
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 space-y-0">
-                  <FormLabel className="text-left sm:text-right">Name</FormLabel>
+                  <FormLabel className="text-left sm:text-right">
+                    Name
+                  </FormLabel>
                   <div className="col-span-1 sm:col-span-3">
                     <FormControl>
                       <Input placeholder="e.g. Iron Ore" {...field} />
@@ -112,15 +144,23 @@ export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMat
               name="stockQuantity"
               render={({ field }) => (
                 <FormItem className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4 space-y-0">
-                  <FormLabel className="text-left sm:text-right">Stock</FormLabel>
+                  <FormLabel className="text-left sm:text-right">
+                    Stock
+                  </FormLabel>
                   <div className="col-span-1 sm:col-span-3">
                     <FormControl>
-                      <Input 
+                      <Input
                         type="number"
                         placeholder="0"
                         step="1"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ""
+                              ? undefined
+                              : Number(e.target.value),
+                          )
+                        }
                         value={field.value ?? ""}
                       />
                     </FormControl>
@@ -135,9 +175,9 @@ export function RawMaterialEditDialog({ isOpen, onOpenChange, material }: RawMat
                 <Button className="w-full sm:w-auto">Cancel</Button>
               </DialogClose>
               <div className="flex-1 hidden sm:block" />
-              <Button 
+              <Button
                 type="submit"
-                className="w-full sm:w-auto hover:bg-emerald-700 hover:text-white" 
+                className="w-full sm:w-auto hover:bg-emerald-700 hover:text-white"
                 disabled={form.formState.isSubmitting}
               >
                 Save changes

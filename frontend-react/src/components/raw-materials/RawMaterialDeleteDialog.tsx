@@ -20,7 +20,11 @@ interface RawMaterialDeleteDialogProps {
   material: RawMaterial | null;
 }
 
-export function RawMaterialDeleteDialog({ isOpen, onOpenChange, material }: RawMaterialDeleteDialogProps) {
+export function RawMaterialDeleteDialog({
+  isOpen,
+  onOpenChange,
+  material,
+}: RawMaterialDeleteDialogProps) {
   const dispatch = useAppDispatch();
 
   const handleDelete = async () => {
@@ -44,11 +48,15 @@ export function RawMaterialDeleteDialog({ isOpen, onOpenChange, material }: RawM
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[95vw] sm:max-w-[425px]" showCloseButton={false}>
+      <DialogContent
+        className="w-[95vw] sm:max-w-106.25"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle>Delete Raw Material</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete the raw material "{material?.name}"? This action cannot be undone.
+            Are you sure you want to delete the raw material "{material?.name}"?
+            This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-t pt-4 mt-6">
@@ -56,7 +64,9 @@ export function RawMaterialDeleteDialog({ isOpen, onOpenChange, material }: RawM
             <Button className="w-full sm:w-auto">Cancel</Button>
           </DialogClose>
           <div className="flex-1 hidden sm:block" />
-          <Button className="w-full sm:w-auto" onClick={handleDelete}>Delete</Button>
+          <Button className="w-full sm:w-auto" onClick={handleDelete}>
+            Delete
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

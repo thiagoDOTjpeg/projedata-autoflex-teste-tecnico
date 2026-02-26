@@ -19,12 +19,16 @@ import {
 
 export function RawMaterialsPanel() {
   const dispatch = useAppDispatch();
-  const { rawMaterials, loading, error } = useAppSelector((state) => state.rawMaterials);
+  const { rawMaterials, loading, error } = useAppSelector(
+    (state) => state.rawMaterials,
+  );
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [selectedMaterial, setSelectedMaterial] = useState<RawMaterial | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<RawMaterial | null>(
+    null,
+  );
 
   const handleEditClick = (material: RawMaterial) => {
     setSelectedMaterial(material);
@@ -44,7 +48,7 @@ export function RawMaterialsPanel() {
     return <RawMaterialsTableSkeleton />;
   }
 
-  if (error) { 
+  if (error) {
     return (
       <div className="p-4 text-center text-red-500 border rounded-md bg-red-50">
         Error: {error}
@@ -55,7 +59,7 @@ export function RawMaterialsPanel() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button 
+        <Button
           className="text-white bg-emerald-600 hover:bg-emerald-700"
           onClick={() => setIsCreateOpen(true)}
         >
@@ -63,7 +67,7 @@ export function RawMaterialsPanel() {
         </Button>
       </div>
       <div className="rounded-md border bg-white shadow-sm overflow-x-auto scrollbar-hide">
-        <Table className="min-w-[500px]">
+        <Table className="min-w-125">
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -81,7 +85,12 @@ export function RawMaterialsPanel() {
                     <Button size="icon" onClick={() => handleEditClick(rm)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button size="icon" className="hover:text-red-600" onClick={() => handleDeleteClick(rm)} aria-label="Delete">
+                    <Button
+                      size="icon"
+                      className="hover:text-red-600"
+                      onClick={() => handleDeleteClick(rm)}
+                      aria-label="Delete"
+                    >
                       <Trash2 className="h-4 w-4 transition-colors duration-200" />
                     </Button>
                   </div>
@@ -112,7 +121,6 @@ export function RawMaterialsPanel() {
   );
 }
 
-
 function RawMaterialsTableSkeleton() {
   return (
     <div className="space-y-4">
@@ -132,10 +140,10 @@ function RawMaterialsTableSkeleton() {
             {Array.from({ length: 5 }).map((_, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <Skeleton className="h-4 w-[200px]" />
+                  <Skeleton className="h-4 w-50" />
                 </TableCell>
                 <TableCell>
-                  <Skeleton className="h-4 w-[100px]" />
+                  <Skeleton className="h-4 w-25" />
                 </TableCell>
                 <TableCell>
                   <div className="flex justify-end gap-2">

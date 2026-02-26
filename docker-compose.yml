@@ -30,10 +30,10 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - QUARKUS_HTTP_CORS_ORIGINS=http://localhost,http://127.0.0.1
-      - QUARKUS_DATASOURCE_JDBC_URL=jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
-      - QUARKUS_DATASOURCE_USERNAME=inventory_user
-      - QUARKUS_DATASOURCE_PASSWORD=inventory_pwd
+      - CORS_ORIGINS=http://localhost
+      - DB_URL=jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
+      - DB_USER=inventory_user
+      - DB_PASSWORD=inventory_pwd
       - QUARKUS_HTTP_HOST=0.0.0.0
     depends_on:
       oracle-db:

@@ -19,7 +19,7 @@ docker compose up --build
 
 - Frontend: [http://localhost](http://localhost)
 - Backend API: [http://localhost:8081](http://localhost:8081)
-- Swagger UI: [http://localhost:8081/swagger](http://localhost:8081/swagger)
+- Swagger UI: [http://localhost:8081/api/swagger](http://localhost:8081/api/swagger)
 
 ### 2. Execução Manual (Desenvolvimento)
 

@@ -1,13 +1,9 @@
-docker-compose up --build
-
 # Industrial Inventory System - Projedata Technical Test
 
 ![Quarkus](<https://img.shields.io/badge/Backend-Quarkus%20(Java%2021)-blue>)
 ![React](https://img.shields.io/badge/Frontend-React%2019-brightgreen)
 ![Oracle](https://img.shields.io/badge/Database-Oracle-orange)
 ![Docker Compose](https://img.shields.io/badge/Deploy-Docker%20Compose-yellow)
-
-> Plataforma de gestão de inventário industrial, focada em consistência de dados e experiência do usuário. Demonstra padrões modernos de arquitetura, resiliência e testes.
 
 ---
 
@@ -18,7 +14,7 @@ docker-compose up --build
 Orquestra Oracle, Backend e Frontend. Basta rodar:
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 - Frontend: [http://localhost](http://localhost)
